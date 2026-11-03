@@ -158,6 +158,44 @@ h2 {
   font-size: clamp(1.6rem, 7vw, 2rem);
 }
 
+/* Space for what is filled in after the data loads, so nothing below jumps.
+   Heights match the draws in nightsChart.ts and main.ts. */
+#hero-stats {
+  min-height: 200px;
+}
+
+#nights-chart {
+  min-height: 320px;
+}
+
+#nights-controls {
+  min-height: 200px;
+}
+
+#nights-readout {
+  min-height: 7.5em;
+}
+
+.chart:empty::before {
+  content: "Loading chart…";
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (min-width: 640px) {
+  #hero-stats {
+    min-height: 120px;
+  }
+
+  #nights-controls {
+    min-height: 150px;
+  }
+
+  #nights-readout {
+    min-height: 5em;
+  }
+}
+
 /* "Method and limits": the long grey notes, one click away. */
 .method {
   margin-top: 12px;
