@@ -88,6 +88,13 @@ function inSection(sectionId: string, setup: () => void): void {
   }
 }
 
+/** A link to a collapsed section (the contents line, or a shared URL) opens it. */
+function openSectionFromHash(): void {
+  const target = document.getElementById(window.location.hash.slice(1));
+  const details = target?.querySelector(":scope > details");
+  if (details instanceof HTMLDetailsElement) details.open = true;
+}
+
 // MapLibre is most of the JavaScript, so it is only downloaded when the
 // reader scrolls near the map.
 const MAP_PRELOAD_MARGIN = "600px";
@@ -113,6 +120,8 @@ function loadMapWhenNear(snapshots: string[]): void {
 }
 
 async function main(): Promise<void> {
+  openSectionFromHash();
+  window.addEventListener("hashchange", openSectionFromHash);
   const [meta, nights, cities, register] = await Promise.all([loadMeta(), loadNights(), loadCities(), loadRegister()]);
   renderHeroStats(cities);
   renderFooter(meta);

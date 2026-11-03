@@ -565,3 +565,45 @@ section.more {
 .more > details[open] > summary {
   margin-bottom: 12px;
 }
+
+/* ---- wayfinding ---- */
+.skip-link {
+  position: absolute;
+  left: 8px;
+  top: -48px;
+  padding: 10px 14px;
+  background: var(--text);
+  color: var(--bg);
+  z-index: 10;
+}
+
+.skip-link:focus {
+  top: 8px;
+}
+
+main:focus {
+  outline: none;
+}
+
+.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 14px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+}
+
+header.hero {
+  padding-bottom: 8px;
+}
+
+.toc a {
+  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+}
+
+section {
+  scroll-margin-top: 12px;
+}
