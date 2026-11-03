@@ -2,6 +2,7 @@
 import * as Plot from "@observablehq/plot";
 
 import { mountChart, plotStyle, X_TITLE_EXTRA_HEIGHT, X_TITLE_MARGIN } from "./charts";
+import { cityControl, currentCity } from "./cityChoice";
 import { BANDS, CITIES, CITY_LABELS, type Band, type City, type CityRow, type TransitionTable, type Transitions } from "./data";
 import { cssVar, el, formatInt, formatPct, formatQuarter, POPULATION, requireElement, segmented } from "./ui";
 
@@ -56,7 +57,7 @@ export function initFlows(transitions: Transitions): void {
   const controls = requireElement("flows-controls");
   const chart = requireElement("flows-chart");
 
-  let city: City = "barcelona";
+  let city: City = currentCity();
   let periodIndex = -1; // -1 = first to last snapshot; otherwise a Barcelona quarter
   let render = () => {};
 
@@ -127,17 +128,12 @@ export function initFlows(transitions: Transitions): void {
   }
 
   controls.append(
-    segmented(
-      "City",
-      CITIES.map((c) => ({ value: c, label: CITY_LABELS[c] })),
-      city,
-      (value) => {
-        city = value;
-        periodIndex = -1;
-        renderPeriodControl();
-        render();
-      },
-    ),
+    cityControl((value) => {
+      city = value;
+      periodIndex = -1;
+      renderPeriodControl();
+      render();
+    }),
     periodGroup,
   );
   renderPeriodControl();

@@ -5,7 +5,8 @@
 import * as Plot from "@observablehq/plot";
 
 import { mountChart, plotStyle, X_TITLE_MARGIN } from "./charts";
-import { CITIES, CITY_LABELS, type Band, type City, type CityRow, type NightsRow } from "./data";
+import { CITY_LABELS, type Band, type City, type CityRow, type NightsRow } from "./data";
+import { cityControl, currentCity } from "./cityChoice";
 import { cssVar, el, formatInt, formatPct, POPULATION, requireElement, segmented, setDataTable } from "./ui";
 
 const MAX_NIGHTS_SHOWN = 60; // longer minimum stays are summarised in the readout
@@ -29,7 +30,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
 
   const roundsFor = (city: City) => [...new Set(rows.filter((r) => r.city === city).map((r) => r.round))];
 
-  let city: City = "barcelona";
+  let city: City = currentCity();
   let round = roundsFor(city).at(-1) ?? "";
   let cutoff = stayLine; // the reader's exploration cutoff; starts at the legal limit
   let render = () => {}; // replaced by mountChart below
@@ -189,18 +190,13 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
   sliderGroup.append(sliderLabel, sliderRow);
 
   controls.append(
-    segmented(
-      "City",
-      CITIES.map((c) => ({ value: c, label: CITY_LABELS[c] })),
-      city,
-      (value) => {
-        city = value;
-        const rounds = roundsFor(city);
-        if (!rounds.includes(round)) round = rounds.at(-1) ?? "";
-        renderRoundControl();
-        render();
-      },
-    ),
+    cityControl((value) => {
+      city = value;
+      const rounds = roundsFor(city);
+      if (!rounds.includes(round)) round = rounds.at(-1) ?? "";
+      renderRoundControl();
+      render();
+    }),
     roundGroup,
     sliderGroup,
   );
