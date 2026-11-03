@@ -10,6 +10,8 @@ import { cssVar, el, formatCalendarQuarter, formatInt, formatPct, formatQuarter,
 
 const TIMELINE_START = "2023-09-01";
 const TIMELINE_END = "2029-03-01";
+// On a phone the years are every second one, so the labels do not touch.
+const NARROW_TICK_YEARS = [2024, 2026, 2028];
 
 interface Inputs {
   meta: Meta;
@@ -152,7 +154,7 @@ export function initLevers(inputs: Inputs): void {
       height: 40 + rows.length * 34,
       marginLeft: 158,
       style: plotStyle(),
-      x: { type: "utc", domain: [day(TIMELINE_START), day(TIMELINE_END)], label: null, ticks: narrow ? 4 : 7 },
+      x: { type: "utc", domain: [day(TIMELINE_START), day(TIMELINE_END)], label: null, ticks: narrow ? NARROW_TICK_YEARS.map((year) => day(`${year}-01-01`)) : 7 },
       y: { domain: rows, label: null },
       marks: [
         Plot.ruleX([new Date()], { stroke: cssVar("--muted"), strokeDasharray: "2,3" }),

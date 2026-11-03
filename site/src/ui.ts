@@ -76,12 +76,6 @@ export function segmented<V extends string>(
     return button;
   });
   group.append(row);
-  // On phones the row scrolls sideways: bring the selected button into view
-  // once it is laid out (scrollLeft, not scrollIntoView, so the page stays put).
-  requestAnimationFrame(() => {
-    const selected = buttons.find((b) => b.getAttribute("aria-pressed") === "true");
-    if (selected && row.scrollWidth > row.clientWidth) row.scrollLeft = selected.offsetLeft - row.offsetLeft;
-  });
   return group;
 }
 

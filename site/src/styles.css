@@ -169,7 +169,7 @@ h2 {
 }
 
 #nights-controls {
-  min-height: 200px;
+  min-height: 260px;
 }
 
 #nights-readout {
@@ -403,35 +403,21 @@ footer a {
   flex-basis: 100%;
 }
 
-/* On phones, each button row scrolls sideways instead of wrapping, so the
-   chart stays near the top of the screen. */
+/* On phones the control groups stack and each row of buttons wraps, so every
+   option stays visible. */
 @media (max-width: 639px) {
   .controls {
     flex-direction: column;
     gap: 10px;
   }
 
-  /* Without this, groups grow to the width of their unwrapped buttons. */
   .controls > *,
   .control-group {
     width: 100%;
     min-width: 0;
   }
 
-  .segmented {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    min-width: 0;
-    padding-bottom: 2px;
-  }
-
-  .segmented::-webkit-scrollbar {
-    display: none;
-  }
-
   .segmented button {
-    flex: 0 0 auto;
     min-height: 36px;
   }
 }
