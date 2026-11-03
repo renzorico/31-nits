@@ -607,3 +607,49 @@ header.hero {
 section {
   scroll-margin-top: 12px;
 }
+
+/* ---- data tables behind "Show the chart as a table" ---- */
+.table-wrap {
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.table-wrap:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.table-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-wrap caption {
+  text-align: left;
+  padding: 8px 10px;
+  color: var(--muted);
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 6px 10px;
+  text-align: right;
+  border-top: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.table-wrap th:first-child,
+.table-wrap td:first-child {
+  text-align: left;
+}
+
+.table-wrap thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}

@@ -79,6 +79,29 @@ export function segmented<V extends string>(
   return group;
 }
 
+/** A text alternative to a chart: the same figures as a table, scrollable
+ *  and reachable by keyboard. Replaces any table already in `host`. */
+export function setDataTable(host: HTMLElement, caption: string, headers: string[], rows: string[][]): void {
+  const table = el("table");
+  table.append(el("caption", {}, caption));
+  const head = el("tr");
+  for (const header of headers) head.append(el("th", { scope: "col" }, header));
+  const thead = el("thead");
+  thead.append(head);
+  table.append(thead);
+  const body = el("tbody");
+  for (const row of rows) {
+    const tr = el("tr");
+    row.forEach((cell, index) => tr.append(el(index === 0 ? "th" : "td", index === 0 ? { scope: "row" } : {}, cell)));
+    body.append(tr);
+  }
+  table.append(body);
+  const wrap = el("div", { class: "table-wrap", tabindex: "0", role: "region", "aria-label": caption });
+  wrap.append(table);
+  host.querySelector(".table-wrap")?.remove();
+  host.append(wrap);
+}
+
 /** Re-run a callback when the colour scheme flips, so SVG/canvas colours update. */
 export function onThemeChange(callback: () => void): void {
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", callback);

@@ -23,7 +23,12 @@ export function plotStyle(): Record<string, string> {
  */
 export function mountChart(container: HTMLElement, draw: (width: number) => Element): () => void {
   const render = () => {
-    container.replaceChildren(draw(Math.max(MIN_CHART_WIDTH, container.clientWidth)));
+    const drawn = draw(Math.max(MIN_CHART_WIDTH, container.clientWidth));
+    container.replaceChildren(drawn);
+    // The wrapper is the image (role="img" in index.html), so it carries the
+    // name; a label on the svg inside would be skipped by screen readers.
+    const label = drawn.getAttribute("aria-label") ?? drawn.querySelector("[aria-label]")?.getAttribute("aria-label");
+    if (label) container.setAttribute("aria-label", label);
   };
   // Redraw only on a real width change, so a redraw cannot trigger
   // another resize callback.

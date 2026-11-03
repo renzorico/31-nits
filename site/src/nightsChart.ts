@@ -6,7 +6,7 @@ import * as Plot from "@observablehq/plot";
 
 import { mountChart, plotStyle, X_TITLE_MARGIN } from "./charts";
 import { CITIES, CITY_LABELS, type Band, type City, type CityRow, type NightsRow } from "./data";
-import { cssVar, el, formatInt, formatPct, POPULATION, requireElement, segmented } from "./ui";
+import { cssVar, el, formatInt, formatPct, POPULATION, requireElement, segmented, setDataTable } from "./ui";
 
 const MAX_NIGHTS_SHOWN = 60; // longer minimum stays are summarised in the readout
 const CHART_HEIGHT = 320;
@@ -25,6 +25,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
   const controls = requireElement<HTMLDivElement>("nights-controls");
   const readout = requireElement<HTMLParagraphElement>("nights-readout");
   const robustness = requireElement<HTMLParagraphElement>("nights-robustness");
+  const tableHost = requireElement("nights-table");
 
   const roundsFor = (city: City) => [...new Set(rows.filter((r) => r.city === city).map((r) => r.round))];
 
@@ -127,6 +128,17 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
 
   function updateReadout(shown: Bar[], total: number, beyond: number): void {
     updateRobustness();
+    setDataTable(
+      tableHost,
+      `${CITY_LABELS[city]}, ${round}: listings with open dates by minimum stay`,
+      ["Minimum stay (nights)", "Listings", "Share", "Median asking price"],
+      shown.map((b) => [
+        String(b.nights),
+        formatInt(b.listings),
+        formatPct(b.share),
+        b.medianPrice === null ? "n/a" : `€${Math.round(b.medianPrice)}`,
+      ]),
+    );
     const atOrBelow = shown.filter((b) => b.nights <= cutoff).reduce((s, b) => s + b.listings, 0);
     const nearCutoff = shown.filter((b) => b.nights === cutoff || b.nights === cutoff + 1).reduce((s, b) => s + b.listings, 0);
     readout.replaceChildren(

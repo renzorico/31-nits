@@ -3,7 +3,7 @@ import * as Plot from "@observablehq/plot";
 
 import { mountChart, plotStyle, X_TITLE_EXTRA_HEIGHT, X_TITLE_MARGIN } from "./charts";
 import type { NeighbourhoodRow, Register } from "./data";
-import { cssVar, el, formatInt, formatPct, formatQuarter, POPULATION, requireElement } from "./ui";
+import { cssVar, el, formatInt, formatPct, formatQuarter, POPULATION, requireElement, setDataTable } from "./ui";
 
 const LEGEND_WIDTH = 260;
 const LEGEND_MARGIN = 14;
@@ -57,6 +57,22 @@ export function initRegister(register: Register, places: NeighbourhoodRow[]): vo
       `${formatInt(p.active_listings)} ${POPULATION}, ${formatInt(p.with_tourist_licence)} showing a licence`,
       p.share_month_plus === null ? "no listings: share of 31+ nights is not defined" : `${formatPct(p.share_month_plus, 0)} ask 31+ nights`,
     ].join("\n");
+
+  setDataTable(
+    requireElement("register-table"),
+    "Barcelona neighbourhoods: registered tourist flats and listings with open dates",
+    ["Neighbourhood", "District", "Registered flats", "Listings", "Showing a licence", "Ask 31+ nights"],
+    [...data]
+      .sort((a, b) => a.neighbourhood.localeCompare(b.neighbourhood, "es"))
+      .map((p) => [
+        p.neighbourhood,
+        p.district,
+        formatInt(p.registered_huts),
+        formatInt(p.active_listings),
+        formatInt(p.with_tourist_licence),
+        p.share_month_plus === null ? "n/a" : formatPct(p.share_month_plus, 0),
+      ]),
+  );
 
   mountChart(requireElement("register-chart"), (width) => {
     const plot = Plot.plot({
