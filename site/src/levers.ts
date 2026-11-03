@@ -132,6 +132,14 @@ function timelineSpans(meta: Meta): { spans: Span[]; points: EventPoint[] } {
   return { spans, points: [...laws, ...elections] };
 }
 
+/** The always-visible line of a rule: its name and the law behind it. The
+ *  rest of the card opens on click, so the section scans as a list. */
+function ruleSummary(title: string, law: string): HTMLElement {
+  const summary = el("summary");
+  summary.append(el("h3", {}, title), el("span", { class: "law" }, law));
+  return summary;
+}
+
 export function initLevers(inputs: Inputs): void {
   const { meta } = inputs;
   const { spans, points } = timelineSpans(meta);
@@ -170,7 +178,7 @@ export function initLevers(inputs: Inputs): void {
 
   requireElement("lever-cards").replaceChildren(
     ...Object.entries(meta.policy_levers).map(([id, lever]) => {
-      const card = el("article", { class: "card" });
+      const card = el("details", { class: "card" });
       const facts = el("dl");
       const add = (list: HTMLElement, term: string, text: string) => {
         if (text) list.append(el("dt", {}, term), el("dd", {}, text));
@@ -198,7 +206,7 @@ export function initLevers(inputs: Inputs): void {
       const more = el("details", { class: "card-detail" });
       more.append(el("summary", {}, "Jurisdiction, exceptions and status"), detail);
 
-      card.append(el("h3", {}, lever.title), el("p", { class: "law" }, lever.law), facts, more);
+      card.append(ruleSummary(lever.title, lever.law), facts, more);
       const links = el("p", { class: "card-links" });
       lever.sources.forEach((source, index) => {
         if (index > 0) links.append(document.createTextNode(" · "));
@@ -213,10 +221,9 @@ export function initLevers(inputs: Inputs): void {
   const later = requireElement("later-developments");
   later.replaceChildren(
     ...meta.post_observation_developments.map((item) => {
-      const card = el("article", { class: "card" });
+      const card = el("details", { class: "card" });
       card.append(
-        el("h3", {}, item.title),
-        el("p", { class: "law" }, `After the observation window · ${item.date}`),
+        ruleSummary(item.title, `After the observation window · ${item.date}`),
         el("p", {}, item.summary),
         el("p", { class: "note" }, item.note),
         el("a", { href: item.url, rel: "noopener" }, "Official text"),
