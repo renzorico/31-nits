@@ -5,8 +5,8 @@
 import * as Plot from "@observablehq/plot";
 
 import { mountChart, plotStyle } from "./charts";
-import { CITIES, CITY_LABELS, type BarcelonaTrend, type CityRow, type Meta, type Register, type RentRow } from "./data";
-import { cssVar, el, formatCalendarQuarter, formatInt, formatPct, formatQuarter, POPULATION, requireElement } from "./ui";
+import { CITY_LABELS, type BarcelonaTrend, type CityRow, type Meta, type Register, type RentRow } from "./data";
+import { cssVar, el, formatCalendarQuarter, formatInt, formatQuarter, requireElement } from "./ui";
 
 const TIMELINE_START = "2023-09-01";
 const TIMELINE_END = "2029-03-01";
@@ -33,8 +33,7 @@ function dataShows(id: string, { meta, register, rents, trends, cities }: Inputs
       if (!latest || totals.length === 0) return "";
       return (
         `The register holds ${formatInt(Math.min(...totals))}–${formatInt(Math.max(...totals))} records in every published quarter: ` +
-        `no decline yet. ${formatPct(latest.displayed_found_pct, 0)} of the licence numbers shown on listings with open dates exist in it, ` +
-        `and ${formatPct(latest.register_numbers_displayed_pct, 0)} of its numbers are shown on at least one such listing. ` +
+        "no decline yet. How the register matches listings is in the register section. " +
         "A number match does not verify that the listing is that flat."
       );
     }
@@ -59,15 +58,9 @@ function dataShows(id: string, { meta, register, rents, trends, cities }: Inputs
       const first = trends[0];
       const second = trends[1];
       const last = trends.at(-1);
-      const shareIn = (city: string) => cities.find((c) => c.city === city)?.rounds["Sep 2026"]?.share_month_plus;
-      const barcelona = shareIn("barcelona");
-      const others = CITIES.filter((c) => c !== "barcelona")
-        .map((c) => shareIn(c))
-        .filter((v): v is number => v !== undefined);
       const clearGapCities = cities.filter((c) => c.exit_gap.ci_low > 0).map((c) => CITY_LABELS[c.city]);
-      if (!first || !second || !last || barcelona === undefined || others.length === 0) return "";
+      if (!first || !second || !last) return "";
       return (
-        `${formatPct(barcelona, 0)} of Barcelona's ${POPULATION} ask 31+ nights, vs ${Math.round(Math.min(...others))}–${Math.round(Math.max(...others))}% in ${CITIES.filter((c) => c !== "barcelona").map((c) => CITY_LABELS[c]).join(", ")}. ` +
         `Listings asking over 31 nights went from ${formatInt(first.bands.over_31)} (${formatQuarter(first.snapshot)}) to ${formatInt(second.bands.over_31)} (${formatQuarter(second.snapshot)}) and ${formatInt(last.bands.over_31)} (${formatQuarter(last.snapshot)}). ` +
         `Month-plus listings were clearly more likely than shorter-stay ones to be absent from the later scrape in ${clearGapCities.length} of 5 cities (${clearGapCities.join(", ")}; host-account intervals above zero), and Barcelona's gap cannot be told apart from any other city's.`
       );

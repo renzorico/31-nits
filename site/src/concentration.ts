@@ -7,6 +7,8 @@ import { cssVar, el, formatPct, POPULATION, requireElement } from "./ui";
 
 const X_MAX = 30; // % of hosts shown; beyond this the curves flatten out
 const DEFAULT_TOP = 1;
+const END_LABEL_MARGIN = 84; // room right of the plot for the city names
+const END_LABEL_GAP = 7; // minimum distance between two labels, in % of listings
 const CITY_COLOURS: Record<City, string> = {
   barcelona: "--seasonal",
   madrid: "--tourist",
@@ -14,6 +16,17 @@ const CITY_COLOURS: Record<City, string> = {
   malaga: "--cat-4",
   sevilla: "--cat-6",
 };
+
+/** City names for the right end of each curve. Where curves end close
+ *  together the labels are pushed apart so none overlaps another. */
+function endLabels(curves: Concentration): { city: string; x: number; y: number }[] {
+  const ends = CITIES.map((c) => ({ city: CITY_LABELS[c], x: X_MAX, y: listingShareAt(curves[c], X_MAX) })).sort((a, b) => b.y - a.y);
+  ends.forEach((end, index) => {
+    const above = ends[index - 1];
+    if (above) end.y = Math.min(end.y, above.y - END_LABEL_GAP);
+  });
+  return ends;
+}
 
 /** Linear interpolation of the curve at x (% of hosts). */
 function listingShareAt(curve: { host_share: number[]; listing_share: number[] }, x: number): number {
@@ -43,12 +56,15 @@ export function initConcentration(curves: Concentration): void {
     curves[city].host_share.map((x, i) => ({ city: CITY_LABELS[city], x, y: curves[city].listing_share[i] ?? 0 })),
   ).filter((p) => p.x <= X_MAX);
 
+  const labels = endLabels(curves);
+
   function draw(width: number): Element {
     const plot = Plot.plot({
       width,
       height: 320 + X_TITLE_EXTRA_HEIGHT,
       marginBottom: X_TITLE_MARGIN,
       marginLeft: 44,
+      marginRight: END_LABEL_MARGIN,
       style: plotStyle(),
       x: { label: "largest host accounts, % of all host accounts →", domain: [0, X_MAX] },
       y: { label: `↑ % of ${POPULATION} they run`, domain: [0, 100], grid: true },
@@ -61,6 +77,7 @@ export function initConcentration(curves: Concentration): void {
         Plot.line([[0, 0], [X_MAX, X_MAX]], { stroke: cssVar("--muted"), strokeDasharray: "3,3" }),
         Plot.ruleX([top], { stroke: cssVar("--text"), strokeDasharray: "4,3" }),
         Plot.line(points, { x: "x", y: "y", stroke: "city", strokeWidth: 2 }),
+        Plot.text(labels, { x: "x", y: "y", text: "city", fill: "city", textAnchor: "start", dx: 8, fontWeight: 600 }),
         Plot.dot(
           CITIES.map((c) => ({ city: CITY_LABELS[c], x: top, y: listingShareAt(curves[c], top) })),
           { x: "x", y: "y", fill: "city", r: 4, tip: true, title: (d: { city: string; y: number }) => `${d.city}: ${formatPct(d.y)}` },
