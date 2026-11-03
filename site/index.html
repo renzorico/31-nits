@@ -31,14 +31,12 @@
   </head>
   <body>
     <header class="hero">
-      <p class="kicker">Barcelona · Madrid · Valencia · Málaga · Sevilla · Dec 2025 – Sep 2026</p>
+      <p class="kicker">Barcelona and four Spanish cities · Dec 2025 – Sep 2026</p>
       <h1>The 31-night line</h1>
       <p class="lede">
-        In Catalonia, a tourist flat is let for stays of 31 days or fewer; the rules treat longer
-        stays differently. This page looks at where Airbnb listings' minimum stays sit against that
-        number, and against the other housing rules in force. A minimum stay is a setting a host
-        chooses, not a contract, an actual stay or a legal finding. The page reports what the data
-        shows and what it cannot show.
+        In Catalonia, a tourist stay is 31 days or fewer. Where do Airbnb listings' minimum stays
+        sit against that line? A minimum stay is a setting hosts choose, not an actual stay or a
+        legal finding.
       </p>
       <div class="stats" id="hero-stats" aria-live="polite"></div>
     </header>
@@ -47,22 +45,27 @@
       <section id="nights" aria-labelledby="nights-title">
         <h2 id="nights-title">Where would you draw the line?</h2>
         <p>
-          Each bar is the share of listings with open dates asking for that minimum stay: blue
-          asks under 31 nights, grey exactly 31, orange over 31. The label marks the Catalan
-          tourist-stay limit. Move the exploration cutoff to see how many listings sit on each
-          side of any number of nights. In Barcelona, they pile up at exactly 31 and 32 nights.
+          Each bar is the share of listings asking that minimum stay: blue under 31 nights, grey
+          exactly 31, orange over 31. In Barcelona they pile up at 31 and 32.
         </p>
-        <div class="controls" id="nights-controls"></div>
         <div class="chart" id="nights-chart" role="img"></div>
+        <div class="controls" id="nights-controls"></div>
         <p class="readout" id="nights-readout" aria-live="polite"></p>
-        <p class="note" id="nights-robustness"></p>
-        <p class="note">
-          Why 31? A tourist stay is “a continuous period of 31 days or fewer” (Decret 75/2020, art.
-          221-1). Whether a 31-<em>night</em> booking counts as 31 days or fewer is ambiguous, so
-          listings asking exactly 31 are shown on their own. A minimum stay is what a host asks,
-          not how long guests stay or how a stay is classified in law. Other regions draw their
-          lines differently, so across cities 31+ is only a common measurement threshold.
-        </p>
+        <details class="method">
+          <summary>Method and limits</summary>
+          <p class="note">
+            The label marks the Catalan tourist-stay limit. The exploration cutoff shows how many
+            listings sit on each side of any number of nights.
+          </p>
+          <p class="note" id="nights-robustness"></p>
+          <p class="note">
+            Why 31? A tourist stay is “a continuous period of 31 days or fewer” (Decret 75/2020, art.
+            221-1). Whether a 31-<em>night</em> booking counts as 31 days or fewer is ambiguous, so
+            listings asking exactly 31 are shown on their own. A minimum stay is what a host asks,
+            not how long guests stay or how a stay is classified in law. Other regions draw their
+            lines differently, so across cities 31+ is only a common measurement threshold.
+          </p>
+        </details>
       </section>
 
       <section id="map-section" aria-labelledby="map-title">

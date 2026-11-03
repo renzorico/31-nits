@@ -16,7 +16,6 @@ import {
   loadTrends,
   type CityRow,
   type Meta,
-  type Register,
 } from "./data";
 import { initExitGap, initFlows } from "./flows";
 import { initLevers } from "./levers";
@@ -28,22 +27,20 @@ import { el, formatPct, POPULATION, requireElement } from "./ui";
 const LATEST_ROUND = "Sep 2026";
 const REPOSITORY_URL = "https://github.com/renzorico/spain-housing-str-analysis";
 
-function renderHeroStats(cities: CityRow[], register: Register): void {
+function renderHeroStats(cities: CityRow[]): void {
   const latest = (city: string) => cities.find((c) => c.city === city)?.rounds[LATEST_ROUND];
   const barcelona = latest("barcelona");
   const others = CITIES.filter((c) => c !== "barcelona")
     .map((c) => latest(c)?.share_month_plus)
     .filter((v): v is number => v !== undefined);
-  const match = register.match.at(-1);
-  if (!barcelona || others.length === 0 || !match) return;
+  if (!barcelona || others.length === 0) return;
 
   const tiles: [string, string][] = [
     [formatPct(barcelona.share_month_plus, 0), `of Barcelona's ${POPULATION} ask for 31 nights or more (${LATEST_ROUND})`],
     [
       `${Math.round(Math.min(...others))}–${Math.round(Math.max(...others))}%`,
-      `in ${CITIES.filter((c) => c !== "barcelona").map((c) => CITY_LABELS[c]).join(", ")}`,
+      `ask for 31+ nights in ${CITIES.filter((c) => c !== "barcelona").map((c) => CITY_LABELS[c]).join(", ")}`,
     ],
-    [formatPct(match.displayed_found_pct, 0), "of the licence numbers shown on Barcelona listings exist in the official register of tourist flats"],
   ];
   requireElement("hero-stats").replaceChildren(
     ...tiles.map(([value, label]) => {
@@ -117,7 +114,7 @@ function loadMapWhenNear(snapshots: string[]): void {
 
 async function main(): Promise<void> {
   const [meta, nights, cities, register] = await Promise.all([loadMeta(), loadNights(), loadCities(), loadRegister()]);
-  renderHeroStats(cities, register);
+  renderHeroStats(cities);
   renderFooter(meta);
   initNightsChart(nights, meta.stay_line_nights, cities);
   loadMapWhenNear(meta.snapshots.barcelona);
