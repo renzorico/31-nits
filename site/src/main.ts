@@ -1,3 +1,8 @@
+import "@fontsource/jetbrains-mono/latin-400.css";
+import "@fontsource/jetbrains-mono/latin-600.css";
+import "@fontsource/jetbrains-mono/latin-700.css";
+import "@fontsource/public-sans/latin-400.css";
+import "@fontsource/public-sans/latin-600.css";
 import "./styles.css";
 
 import { initCities } from "./cities";
@@ -94,6 +99,13 @@ function openSectionFromHash(): void {
   const details = target?.querySelector(":scope > details");
   if (details instanceof HTMLDetailsElement) details.open = true;
 }
+
+// A printed page has no way to click open: show every section.
+window.addEventListener("beforeprint", () => {
+  document.querySelectorAll("details").forEach((details) => {
+    details.open = true;
+  });
+});
 
 // MapLibre is most of the JavaScript, so it is only downloaded when the
 // reader scrolls near the map.

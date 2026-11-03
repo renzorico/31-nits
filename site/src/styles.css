@@ -1,61 +1,46 @@
-/* Design tokens. Category colours are the same three everywhere:
-   tourist / boundary / seasonal. Picked for contrast in both themes and
-   for colour-blind readers (blue / grey / orange). */
+/* Design tokens. The three minimum-stay colours are the same everywhere
+   (slate / sand / orange); orange is kept for the over-31 group and for
+   Barcelona so it stays the one thing that stands out. */
 /* Token names --tourist / --boundary / --seasonal are historical: they colour
    the three minimum-stay groups (under 31, exactly 31, over 31 nights), which
    are observed settings and not legal classes. */
 :root {
-  --bg: #fbfaf7;
-  --surface: #ffffff;
-  --text: #1c1c1e;
-  --muted: #5f6368;
-  --line: #e4e1da;
-  --accent: #0b5cad;
-  --tourist: #2f6fb3;
-  --boundary: #8a8f98;
-  --seasonal: #e07b24;
+  --bg: #f5f1e8;
+  --surface: #fbf9f3;
+  --text: #1c1b18;
+  --muted: #6b665c;
+  --line: #ddd6c6;
+  --accent: #b84a1a; /* links, focus and the slider: the signal orange, darkened to pass 4.5:1 as text */
+  --tourist: #3f5468;
+  --boundary: #9a8f78;
+  --seasonal: #e4572e; /* the signal orange: the over-31 group and Barcelona */
   --cat-4: #6a3d9a;
-  --cat-5: #2e9e6f;
+  --cat-5: #2e8a60;
   --cat-6: #c43c5c;
-  --cat-7: #b8b8b8;
-  --radius: 10px;
+  --cat-7: #b8b0a0;
+  --radius: 3px;
   --gutter: 16px;
   --measure: 68ch;
-  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #121316;
-    --surface: #1b1d21;
-    --text: #ececec;
-    --muted: #a2a7ae;
-    --line: #2d3036;
-    --accent: #6aa8ec;
-    --tourist: #6aa8ec;
-    --boundary: #9aa0a8;
-    --seasonal: #f29a4a;
+  :root {
+    --bg: #17150f;
+    --surface: #201d16;
+    --text: #ece8dc;
+    --muted: #a8a293;
+    --line: #343024;
+    --accent: #f08a5d;
+    --tourist: #8fa9c2;
+    --boundary: #a89d86;
+    --seasonal: #f26b3a;
     --cat-4: #b493e0;
     --cat-5: #5cc79a;
     --cat-6: #ef7f98;
-    --cat-7: #6b6f76;
+    --cat-7: #6b6657;
   }
-}
-
-:root[data-theme="dark"] {
-  --bg: #121316;
-  --surface: #1b1d21;
-  --text: #ececec;
-  --muted: #a2a7ae;
-  --line: #2d3036;
-  --accent: #6aa8ec;
-  --tourist: #6aa8ec;
-  --boundary: #9aa0a8;
-  --seasonal: #f29a4a;
-  --cat-4: #b493e0;
-  --cat-5: #5cc79a;
-  --cat-6: #ef7f98;
-  --cat-7: #6b6f76;
 }
 
 * {
@@ -86,24 +71,35 @@ p {
   max-width: var(--measure);
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-mono);
+}
+
 h1 {
-  font-size: clamp(2.2rem, 8vw, 3.6rem);
+  font-size: clamp(2rem, 7.5vw, 3.2rem);
   line-height: 1.05;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  font-weight: 700;
   margin: 0.2em 0 0.4em;
 }
 
 h2 {
-  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  font-size: clamp(1.2rem, 4.5vw, 1.6rem);
   line-height: 1.2;
+  font-weight: 600;
   margin: 0 0 0.5em;
+}
+
+::selection {
+  background: var(--seasonal);
+  color: #fff;
 }
 
 .kicker {
   color: var(--muted);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font: 0.8rem var(--font-mono);
   margin: 0;
 }
 
@@ -133,6 +129,8 @@ h2 {
 
 .stat strong {
   display: block;
+  font-family: var(--font-mono);
+  font-weight: 700;
   font-size: 2rem;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
@@ -229,10 +227,8 @@ h2 {
 }
 
 .control-label {
-  font-size: 0.78rem;
+  font: 0.8rem var(--font-mono);
   color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .segmented {
@@ -245,11 +241,12 @@ h2 {
   min-height: 40px; /* comfortable touch target */
   padding: 6px 12px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
   font: inherit;
-  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
   cursor: pointer;
 }
 
@@ -301,7 +298,8 @@ input[type="range"] {
 .chart svg {
   max-width: 100%;
   height: auto;
-  font: 12px var(--font);
+  font: 11px var(--font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 .readout {
@@ -381,7 +379,7 @@ footer a {
   min-height: 32px;
   padding: 2px 8px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: none;
   color: var(--text);
   font: inherit;
@@ -480,7 +478,7 @@ h3 {
 }
 
 .card dt {
-  font-size: 0.75rem;
+  font: 0.75rem var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--muted);
@@ -652,4 +650,26 @@ section {
   position: sticky;
   top: 0;
   background: var(--surface);
+}
+
+/* ---- print: the page as a document, without controls or the map ---- */
+@media print {
+  .toc,
+  .skip-link,
+  .controls,
+  .map-wrap,
+  #map-section {
+    display: none;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+    font-size: 11pt;
+  }
+
+  .card,
+  .chart {
+    break-inside: avoid;
+  }
 }
