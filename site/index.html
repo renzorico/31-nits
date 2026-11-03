@@ -86,111 +86,139 @@
         </p>
       </section>
 
-      <section id="flows" aria-labelledby="flows-title">
-        <h2 id="flows-title">Where did December's listings go?</h2>
-        <p>
-          Inside Airbnb keeps the same id for a listing across snapshots, so each listing with
-          open dates in December 2025 can be followed. By September it is in the same band, has
-          switched band, is still listed but has no open dates, or is absent from the later scrape
-          (withdrawn, re-listed under a new id, or missed: the file cannot say which).
-        </p>
-        <div class="controls" id="flows-controls"></div>
-        <div class="chart" id="flows-chart" role="img"></div>
-        <h3>Is Barcelona different?</h3>
-        <p>
-          Month-plus listings (31+ nights) were more likely than shorter-stay ones to be absent from the
-          later scrape in Barcelona. Catalonia
-          extended its rent limit to seasonal lets on 1 January 2026, so the obvious question is
-          whether the law explains it. The check: the same gap in cities where that law does not
-          apply, with uncertainty that allows for one operator withdrawing many listings at once.
-        </p>
-        <div class="chart" id="gap-chart" role="img"></div>
-        <div class="readout" id="gap-readout"></div>
+      <section id="flows" class="more" aria-labelledby="flows-title">
+        <details>
+          <summary>
+            <h2 id="flows-title">Where did December's listings go?</h2>
+            <span class="more-hint">Follow each listing from December to September, and test whether Barcelona differs.</span>
+          </summary>
+          <p>
+            Inside Airbnb keeps the same id for a listing across snapshots, so each listing with open
+            dates in December 2025 can be followed. By September it is in the same band, has switched
+            band, is still listed without open dates, or is absent (withdrawn, re-listed under a new
+            id, or missed: the file cannot say which).
+          </p>
+          <div class="controls" id="flows-controls"></div>
+          <div class="chart" id="flows-chart" role="img"></div>
+          <h3>Is Barcelona different?</h3>
+          <p>
+            Month-plus listings (31+ nights) were more likely than shorter-stay ones to be absent from
+            the later scrape in Barcelona. Catalonia extended its rent limit to seasonal lets on 1
+            January 2026. The check: the same gap in cities where that law does not apply, with
+            uncertainty that allows for one operator withdrawing many listings at once.
+          </p>
+          <div class="chart" id="gap-chart" role="img"></div>
+          <div class="readout" id="gap-readout"></div>
+        </details>
       </section>
 
-      <section id="cities" aria-labelledby="cities-title">
-        <h2 id="cities-title">Five cities, two snapshots</h2>
-        <p>
-          The same measures for each city, December 2025 and September 2026. Only listings with
-          open dates are counted.
-        </p>
-        <div class="controls" id="cities-controls"></div>
-        <div class="chart" id="cities-chart" role="img"></div>
-        <p class="note" id="cities-note"></p>
+      <section id="cities" class="more" aria-labelledby="cities-title">
+        <details>
+          <summary>
+            <h2 id="cities-title">Five cities, two snapshots</h2>
+            <span class="more-hint">The same measures side by side, December 2025 and September 2026.</span>
+          </summary>
+          <p>Only listings with open dates are counted.</p>
+          <div class="controls" id="cities-controls"></div>
+          <div class="chart" id="cities-chart" role="img"></div>
+          <p class="note" id="cities-note"></p>
+        </details>
       </section>
 
-      <section id="concentration" aria-labelledby="concentration-title">
-        <h2 id="concentration-title">Who supplies the market?</h2>
-        <p>
-          Host accounts ranked from largest to smallest. How many of the listings do the biggest ones
-          run? If every account ran the same number, the curve would be the diagonal. An account is
-          not necessarily one owner or one company.
-        </p>
-        <div class="controls" id="concentration-controls"></div>
-        <div class="chart" id="concentration-chart" role="img"></div>
-        <p class="readout" id="concentration-readout" aria-live="polite"></p>
+      <section id="concentration" class="more" aria-labelledby="concentration-title">
+        <details>
+          <summary>
+            <h2 id="concentration-title">Who supplies the market?</h2>
+            <span class="more-hint">How many listings the biggest host accounts run.</span>
+          </summary>
+          <p>
+            Host accounts ranked from largest to smallest. If every account ran the same number, the
+            curve would be the diagonal. An account is not necessarily one owner or one company.
+          </p>
+          <div class="controls" id="concentration-controls"></div>
+          <div class="chart" id="concentration-chart" role="img"></div>
+          <p class="readout" id="concentration-readout" aria-live="polite"></p>
+        </details>
       </section>
 
-      <section id="register" aria-labelledby="register-title">
-        <h2 id="register-title">Licences on paper, listings online</h2>
-        <p>
-          Barcelona publishes its register of tourist flats (HUT) every quarter. It is the legal
-          count of licences, which Airbnb listings are not. How do the two compare?
-        </p>
-        <div class="stats" id="register-stats"></div>
-        <p class="note">
-          Units differ on purpose: the register counts records, the matching counts licence numbers,
-          and the Airbnb side counts listings. A match shows that a number exists in the register; it
-          does not show that the listing is that flat, and it cannot show how many licensed flats are
-          absent from Airbnb (they may let elsewhere, or not at all). Each snapshot is compared with
-          the register quarter nearest in time; the June snapshot uses Q1 because Q2 is not published.
-        </p>
-        <div class="chart" id="register-chart" role="img"></div>
-        <p class="note">
-          One dot per neighbourhood, September 2026. Dots above the diagonal have more
-          listings with open dates than registered flats. Colour shows the share of listings asking 31+ nights;
-          a minimum stay is a setting, not proof of how a flat is let. Grey dots have no listings.
-        </p>
-        <p class="note" id="register-reconciliation"></p>
+      <section id="register" class="more" aria-labelledby="register-title">
+        <details>
+          <summary>
+            <h2 id="register-title">Licences on paper, listings online</h2>
+            <span class="more-hint">Barcelona's official register of tourist flats against Airbnb listings.</span>
+          </summary>
+          <p>
+            Barcelona publishes its register of tourist flats (HUT) every quarter. It is the legal
+            count of licences, which Airbnb listings are not.
+          </p>
+          <div class="stats" id="register-stats"></div>
+          <div class="chart" id="register-chart" role="img"></div>
+          <p class="note">
+            One dot per neighbourhood, September 2026. Dots above the diagonal have more listings with
+            open dates than registered flats. Colour shows the share of listings asking 31+ nights.
+            Grey dots have no listings.
+          </p>
+          <details class="method">
+            <summary>Method and limits</summary>
+            <p class="note">
+              Units differ on purpose: the register counts records, the matching counts licence
+              numbers, and the Airbnb side counts listings. A match shows that a number exists in the
+              register; it does not show that the listing is that flat, and it cannot show how many
+              licensed flats are absent from Airbnb (they may let elsewhere, or not at all). Each
+              snapshot is compared with the register quarter nearest in time; the June snapshot uses
+              Q1 because Q2 is not published. A minimum stay is a setting, not proof of how a flat is
+              let.
+            </p>
+            <p class="note" id="register-reconciliation"></p>
+          </details>
+        </details>
       </section>
 
-      <section id="rents" aria-labelledby="rents-title">
-        <h2 id="rents-title">What rents did</h2>
-        <p>
-          The average monthly rent of new leases in Barcelona, from the deposits landlords lodge
-          with the Catalan housing agency. Dashed lines mark when the rent limit and its extension
-          to seasonal lets started.
-        </p>
-        <div class="controls" id="rents-controls"></div>
-        <div class="chart" id="rents-chart" role="img"></div>
-        <p class="note">
-          The timing is shown; the cause is not. The average moves when the mix of flats rented
-          changes, and interest rates, wages and supply all move rents at the same time. The
-          vertical axis of the first view starts at €900, not zero, which makes the swings look
-          larger than they are in proportion.
-        </p>
+      <section id="rents" class="more" aria-labelledby="rents-title">
+        <details>
+          <summary>
+            <h2 id="rents-title">What rents did</h2>
+            <span class="more-hint">New-lease rents in Barcelona against the dates the rules started.</span>
+          </summary>
+          <p>
+            The average monthly rent of new leases, from the deposits landlords lodge with the Catalan
+            housing agency. Dashed lines mark when the rent limit and its extension to seasonal lets
+            started.
+          </p>
+          <div class="controls" id="rents-controls"></div>
+          <div class="chart" id="rents-chart" role="img"></div>
+          <p class="note">
+            The timing is shown; the cause is not. Interest rates, wages, supply and the mix of flats
+            rented all move the average. The vertical axis of the first view starts at €900, not zero,
+            which makes the swings look larger than they are.
+          </p>
+        </details>
       </section>
 
-      <section id="levers" aria-labelledby="levers-title">
-        <h2 id="levers-title">Selected rules, one by one</h2>
-        <p>
-          Not every rule in force: the ones this data can say something about. Each card gives the
-          jurisdiction, what the rule says, what this data shows and what it cannot show. Texts
-          were checked against the official gazettes (BOE, DOGC) on the date shown. Rules with the
-          same purpose differ between Catalonia and the rest of Spain, so the owners' rules have a
-          card for each.
-        </p>
-        <div class="chart" id="timeline-chart" role="img"></div>
-        <div class="cards" id="lever-cards"></div>
-        <h3>After the data</h3>
-        <div class="cards" id="later-developments"></div>
+      <section id="levers" class="more" aria-labelledby="levers-title">
+        <details>
+          <summary>
+            <h2 id="levers-title">Selected rules, one by one</h2>
+            <span class="more-hint">What each rule says, what this data shows, what it cannot show.</span>
+          </summary>
+          <p>
+            Not every rule in force: the ones this data can say something about. Texts were checked
+            against the official gazettes (BOE, DOGC) on the date shown.
+          </p>
+          <div class="chart" id="timeline-chart" role="img"></div>
+          <div class="cards" id="lever-cards"></div>
+          <h3>After the data</h3>
+          <div class="cards" id="later-developments"></div>
+        </details>
       </section>
     </main>
 
     <footer>
-      <h2>Sources and caveats</h2>
-      <ul id="sources"></ul>
-      <ul id="caveats"></ul>
+      <details class="method">
+        <summary>Sources and caveats</summary>
+        <ul id="sources"></ul>
+        <ul id="caveats"></ul>
+      </details>
       <p class="note" id="footer-links"></p>
     </footer>
 
