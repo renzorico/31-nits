@@ -19,6 +19,7 @@ import {
   loadRents,
   loadTransitions,
   loadTrends,
+  type City,
   type CityRow,
   type Meta,
 } from "./data";
@@ -32,28 +33,31 @@ import { el, formatPct, POPULATION, requireElement } from "./ui";
 const LATEST_ROUND = "Sep 2026";
 const REPOSITORY_URL = "https://github.com/renzorico/spain-housing-str-analysis";
 
+/** The five cities side by side: share of listings asking 31+ nights.
+ *  Bars share one 0-100% scale; Barcelona is listed first, the rest by value. */
 function renderHeroStats(cities: CityRow[]): void {
-  const latest = (city: string) => cities.find((c) => c.city === city)?.rounds[LATEST_ROUND];
-  const barcelona = latest("barcelona");
-  const others = CITIES.filter((c) => c !== "barcelona")
-    .map((c) => latest(c)?.share_month_plus)
-    .filter((v): v is number => v !== undefined);
-  if (!barcelona || others.length === 0) return;
-
-  const tiles: [string, string][] = [
-    [formatPct(barcelona.share_month_plus, 0), `of Barcelona's ${POPULATION} ask for 31 nights or more (${LATEST_ROUND})`],
-    [
-      `${Math.round(Math.min(...others))}–${Math.round(Math.max(...others))}%`,
-      `ask for 31+ nights in ${CITIES.filter((c) => c !== "barcelona").map((c) => CITY_LABELS[c]).join(", ")}`,
-    ],
+  const rows = CITIES.map((city) => ({
+    city,
+    share: cities.find((c) => c.city === city)?.rounds[LATEST_ROUND]?.share_month_plus,
+  })).filter((row): row is { city: City; share: number } => row.share !== undefined);
+  if (rows.length === 0) return;
+  const ordered = [
+    ...rows.filter((row) => row.city === "barcelona"),
+    ...rows.filter((row) => row.city !== "barcelona").sort((a, b) => b.share - a.share),
   ];
-  requireElement("hero-stats").replaceChildren(
-    ...tiles.map(([value, label]) => {
-      const tile = el("div", { class: "stat" });
-      tile.append(el("strong", {}, value), el("span", {}, label));
-      return tile;
-    }),
-  );
+
+  const caption = el("p", { class: "city-bars-caption" }, `Share of ${POPULATION} asking for 31 nights or more, ${LATEST_ROUND}`);
+  const list = el("ul", { class: "city-bars-list" });
+  for (const { city, share } of ordered) {
+    const item = el("li", { class: city === "barcelona" ? "city-bar is-focus" : "city-bar" });
+    const bar = el("span", { class: "city-bar-track", "aria-hidden": "true" });
+    const fill = el("span", { class: "city-bar-fill" });
+    fill.style.width = `${share}%`;
+    bar.append(fill);
+    item.append(el("span", { class: "city-bar-name" }, CITY_LABELS[city]), bar, el("strong", {}, formatPct(share)));
+    list.append(item);
+  }
+  requireElement("hero-stats").replaceChildren(caption, list);
 }
 
 function renderFooter(meta: Meta): void {

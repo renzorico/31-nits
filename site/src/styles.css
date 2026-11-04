@@ -147,19 +147,78 @@ h2 {
   }
 }
 
-/* The hero shows two tiles side by side, even on phones. */
-#hero-stats {
-  grid-template-columns: repeat(2, 1fr);
+/* ---- hero: the five cities as bars on one 0-100% scale ---- */
+.city-bars {
+  margin-top: 24px;
 }
 
-#hero-stats .stat strong {
-  font-size: clamp(1.6rem, 7vw, 2rem);
+.city-bars-caption {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font: 0.8rem var(--font-mono);
 }
 
-/* Space for what is filled in after the data loads, so nothing below jumps.
-   Heights match the draws in nightsChart.ts and main.ts. */
+.city-bars-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-width: 560px;
+}
+
+.city-bar {
+  display: grid;
+  grid-template-columns: 5.2rem 1fr 4.6rem;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.city-bar strong {
+  text-align: right;
+  font-weight: 600;
+}
+
+.city-bar-track {
+  height: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.city-bar-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  background: var(--cat-7);
+}
+
+.city-bar.is-focus {
+  min-height: 56px;
+}
+
+.city-bar.is-focus .city-bar-name {
+  font-weight: 700;
+}
+
+.city-bar.is-focus strong {
+  font-size: clamp(1.5rem, 6vw, 2rem);
+  font-weight: 700;
+}
+
+.city-bar.is-focus .city-bar-track {
+  height: 14px;
+}
+
+.city-bar.is-focus .city-bar-fill {
+  background: var(--seasonal);
+}
+
+/* Space for what is filled in after the data loads, so nothing below jumps. */
 #hero-stats {
-  min-height: 200px;
+  min-height: 236px;
 }
 
 #nights-chart {
@@ -186,10 +245,6 @@ h2 {
 }
 
 @media (min-width: 640px) {
-  #hero-stats {
-    min-height: 120px;
-  }
-
   #nights-finding {
     min-height: 3.4em;
   }
