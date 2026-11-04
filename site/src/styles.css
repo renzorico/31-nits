@@ -420,6 +420,7 @@ input[type="range"] {
 footer {
   border-top: 1px solid var(--line);
   font-size: 0.9rem;
+  padding-bottom: 80px; /* clear of the fixed Contents link */
 }
 
 footer ul {
@@ -639,6 +640,34 @@ section.more {
   top: 8px;
 }
 
+/* Back to the section list; bottom-left so it stays clear of the map's
+   attribution and controls on the right. */
+.to-contents {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  bottom: max(12px, env(safe-area-inset-bottom));
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  background: var(--surface);
+  color: var(--accent);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font: 0.8rem var(--font-mono);
+  text-decoration: none;
+}
+
+.to-contents[hidden] {
+  display: none;
+}
+
+.to-contents:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
 main:focus {
   outline: none;
 }
@@ -716,6 +745,7 @@ section {
 @media print {
   .toc,
   .skip-link,
+  .to-contents,
   .controls,
   .map-wrap,
   #map-section {

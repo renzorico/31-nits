@@ -33,6 +33,19 @@ import { el, formatPct, POPULATION, requireElement } from "./ui";
 const LATEST_ROUND = "Sep 2026";
 const REPOSITORY_URL = "https://github.com/renzorico/spain-housing-str-analysis";
 
+/** A small "Contents" link that appears once the table of contents has
+ *  scrolled out of view, so the reader can get back to the section list. */
+function initContentsLink(): void {
+  const link = requireElement<HTMLAnchorElement>("to-contents");
+  const toc = requireElement("toc");
+  new IntersectionObserver((entries) => {
+    const entry = entries.at(-1);
+    if (!entry) return;
+    // Show only after the contents scrolled off the top, not before it came into view.
+    link.hidden = entry.isIntersecting || entry.boundingClientRect.top > 0;
+  }).observe(toc);
+}
+
 /** The five cities side by side: share of listings asking 31+ nights.
  *  Bars share one 0-100% scale; Barcelona is listed first, the rest by value. */
 function renderHeroStats(cities: CityRow[]): void {
@@ -136,6 +149,7 @@ function loadMapWhenNear(snapshots: string[]): void {
 }
 
 async function main(): Promise<void> {
+  initContentsLink();
   openSectionFromHash();
   window.addEventListener("hashchange", openSectionFromHash);
   const [meta, nights, cities, register] = await Promise.all([loadMeta(), loadNights(), loadCities(), loadRegister()]);
