@@ -129,7 +129,7 @@ A warm neutral palette with a single orange voice and a muted slate-sand-orange 
 - **Title** (600, 1.15rem): sub-headings (h3) and card titles.
 - **Body** (400, 17px, 1.55): all running text, capped at 68ch. The lede is 1.1rem.
 - **Label** (400, 0.8rem mono; card term labels 0.75rem uppercase, 0.05em tracking): kickers, control labels, definition terms, chart axis text (11px mono).
-- **Stat figure** (700, 2rem mono, tabular numerals): hero and section stat tiles.
+- **Stat figure** (700, 2rem mono, tabular numerals): the Barcelona figure in the hero bars and the register stat tiles.
 
 ### Named Rules
 **The Tabular Figures Rule.** Every number that can be compared (stats, legends, readouts, tables, charts) uses tabular numerals so columns and changing values do not jitter.
@@ -138,7 +138,7 @@ A warm neutral palette with a single orange voice and a muted slate-sand-orange 
 
 ## Layout
 
-Single column. Header, sections and footer share a 980px max width, 16px side gutters and 40px vertical padding; the secondary "more" sections tighten to 16px. Paragraphs stop at 68ch. Sections are separated by a 1px rule, not by background bands. Stat tiles stack on phones (the hero keeps two across) and go three across from 640px. Control groups stack and wrap on phones (36px buttons) and sit in a row from 640px (40px buttons). Space for late-drawn charts and stats is reserved with min-heights so nothing jumps on load. A table of contents of plain links sits under the hero; a skip link is first in the tab order.
+Single column. Header, sections and footer share a 980px max width, 16px side gutters and 40px vertical padding; Paragraphs stop at 60ch (about 75 characters). Sections are separated by a 1px rule, not by background bands. Register stat tiles stack on phones and go three across from 640px. Long choice lists are 44px drop-downs (City and Snapshot sit side by side even on phones); short ones are segmented buttons that wrap (36px on phones, 40px from 640px). Sections after the map open with a one-sentence finding and its limit; the chart and method sit behind a "Show the chart" toggle. Space for late-drawn charts and stats is reserved with min-heights so nothing jumps on load. A table of contents of plain links sits under the hero; a skip link is first in the tab order.
 
 ## Elevation & Depth
 
@@ -165,7 +165,10 @@ Plain and precise: small mono labels, inverted fill when selected, nothing decor
 - **Style:** transparent, 32px high, 0.85rem sans with tabular numerals, colour dot beside the label.
 - **State:** unpressed items drop to 40% opacity with a strikethrough.
 
-### Stat tiles
+### City bars (hero)
+- **Style:** five rows on one 0-100% scale, each a mono city name, a thin track with a fill, and a tabular value; Barcelona first, larger (14px track, 2rem value) with the Signal Orange fill, the other cities in Stone (`--cat-7`). Rows separated by 1px Rule lines. The only place a caption sits above the bars.
+
+### Stat tiles (register)
 - **Style:** Surface fill, 1px Rule border, 3px corners, 14px 16px padding; a 2rem bold mono figure over a muted 0.9rem caption.
 
 ### Cards (policy levers)
@@ -176,13 +179,13 @@ Plain and precise: small mono labels, inverted fill when selected, nothing decor
 - **Method and limits** and **collapsed sections** use native `<details>`. Summary text is Burnt Link Orange, 32px (44px for section heads), with the 3px focus outline.
 
 ### Navigation
-- A wrapped row of Burnt Link Orange text links, 0.85rem, 32px high, 14px column gap. No bar, no sticky header, no active-state chrome.
+- A wrapped row of Burnt Link Orange text links, 0.85rem, 32px high, 14px column gap. No bar, no sticky header. A fixed "Contents ↑" button (44px, bottom-left) appears only while scrolling up, after the contents have scrolled away.
 
 ### Slider
 - Native range input, `accent-color` Burnt Link Orange, 40px high, with a tabular value output beside it.
 
 ### Charts and tables
-- Observable Plot on a transparent background, 11-12px mono axis text, colours from the tokens above, redrawn on theme change. Every chart has a text or table alternative; tables have sticky Surface headers, right-aligned numbers and 1px row rules.
+- Observable Plot on a transparent background, 12px mono axis text, colours from the tokens above, redrawn on theme change. Every chart has a text or table alternative; tables have sticky Surface headers, right-aligned numbers and 1px row rules.
 
 ## Do's and Don'ts
 

@@ -68,12 +68,31 @@ function renderSectionFindings(cities: CityRow[], rents: RentRow[], meta: Meta):
 function initContentsLink(): void {
   const link = requireElement<HTMLAnchorElement>("to-contents");
   const toc = requireElement("toc");
+  let tocAbove = false; // the contents have scrolled off the top
+  let scrollingUp = false;
+  const update = () => {
+    link.hidden = !(tocAbove && scrollingUp);
+  };
   new IntersectionObserver((entries) => {
     const entry = entries.at(-1);
     if (!entry) return;
-    // Show only after the contents scrolled off the top, not before it came into view.
-    link.hidden = entry.isIntersecting || entry.boundingClientRect.top > 0;
+    tocAbove = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+    update();
   }).observe(toc);
+  // Shown only while scrolling up, which is when someone is heading back:
+  // scrolling down it would sit on top of the text being read.
+  let lastY = window.scrollY;
+  window.addEventListener(
+    "scroll",
+    () => {
+      const y = window.scrollY;
+      if (Math.abs(y - lastY) < 6) return;
+      scrollingUp = y < lastY;
+      lastY = y;
+      update();
+    },
+    { passive: true },
+  );
 }
 
 /** The five cities side by side: share of listings asking 31+ nights.
