@@ -20,7 +20,7 @@
   --cat-7: #b8b0a0;
   --radius: 3px;
   --gutter: 16px;
-  --measure: 68ch;
+  --measure: 60ch; /* about 75 characters a line in Public Sans */
   --font: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
@@ -69,6 +69,13 @@ section + section {
 
 p {
   max-width: var(--measure);
+  text-wrap: pretty; /* no single word alone on the last line */
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
 }
 
 h1,
@@ -549,6 +556,7 @@ h3 {
 .card dd {
   margin: 2px 0 0;
   font-size: 0.95rem;
+  max-width: 58ch; /* the card is as wide as the page; the text is not */
 }
 
 .card a {
@@ -565,6 +573,7 @@ h3 {
 .card ul {
   margin: 4px 0 0;
   padding-left: 1.1em;
+  max-width: 58ch;
 }
 
 .card-links {
