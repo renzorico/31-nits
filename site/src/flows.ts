@@ -215,6 +215,12 @@ export function initExitGap(cities: CityRow[]): void {
     );
   }
 
+  requireElement("flows-finding").textContent =
+    `In Barcelona, month-plus listings (31+ nights) were ${gap.points} points more likely than shorter-stay listings to be absent from the September scrape (95% interval ${range(gap.ci_low, gap.ci_high)}). ` +
+    (distinguishable.length === 0
+      ? "Every difference between Barcelona and the other cities includes zero: the data cannot distinguish Barcelona's gap from theirs."
+      : `Barcelona's gap is clearly different from ${distinguishable.map((r) => CITY_LABELS[r.city]).join(", ")}; the others cannot be told apart from it.`);
+
   readout.replaceChildren(
     el(
       "p",

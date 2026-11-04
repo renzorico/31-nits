@@ -601,27 +601,18 @@ h3 {
   outline-offset: 2px;
 }
 
-/* ---- secondary sections: closed until the reader asks ---- */
-section.more {
-  padding-top: 16px;
-  padding-bottom: 16px;
+/* ---- secondary sections: the finding is always shown, the chart and method
+   open on request ---- */
+.finding {
+  margin: 0 0 4px;
+  min-height: 7.5em; /* the shortest sentence on a phone; filled in after the data loads */
 }
 
 .more > details > summary {
   cursor: pointer;
   min-height: 44px;
   padding: 4px 0;
-}
-
-.more > details > summary h2 {
-  display: inline;
-  margin: 0;
-}
-
-.more-hint {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
+  color: var(--accent);
   font-size: 0.9rem;
 }
 

@@ -22,16 +22,46 @@ import {
   type City,
   type CityRow,
   type Meta,
+  type RentRow,
 } from "./data";
 import { initExitGap, initFlows } from "./flows";
 import { initLevers } from "./levers";
 import { initRegister } from "./register";
 import { initRents } from "./rents";
 import { initNightsChart } from "./nightsChart";
-import { el, formatPct, POPULATION, requireElement } from "./ui";
+import { el, formatCalendarQuarter, formatInt, formatPct, POPULATION, requireElement } from "./ui";
 
+const FIRST_ROUND = "Dec 2025";
 const LATEST_ROUND = "Sep 2026";
 const REPOSITORY_URL = "https://github.com/renzorico/spain-housing-str-analysis";
+
+/** The one-sentence findings of the sections that start collapsed, computed
+ *  from the same exported data as their charts. */
+function renderSectionFindings(cities: CityRow[], rents: RentRow[], meta: Meta): void {
+  const monthPlus = (city: City, round: string) => cities.find((c) => c.city === city)?.rounds[round]?.share_month_plus;
+  const moves = CITIES.flatMap((city) => {
+    const first = monthPlus(city, FIRST_ROUND);
+    const last = monthPlus(city, LATEST_ROUND);
+    return first === undefined || last === undefined ? [] : [`${CITY_LABELS[city]} ${formatPct(first)} to ${formatPct(last)}`];
+  });
+  requireElement("cities-finding").textContent =
+    `Share of ${POPULATION} asking for 31 nights or more, ${FIRST_ROUND} to ${LATEST_ROUND}: ${moves.join("; ")}. ` +
+    "The scrapes were on different days, and the other cities have only these two snapshots.";
+
+  const latestRent = rents.at(-1);
+  if (latestRent) {
+    const change =
+      latestRent.yoy_pct === null ? "" : `, ${latestRent.yoy_pct >= 0 ? "up" : "down"} ${formatPct(Math.abs(latestRent.yoy_pct))} on a year earlier`;
+    requireElement("rents-finding").textContent =
+      `The average rent of new leases in Barcelona was €${formatInt(Math.round(latestRent.avg_rent))} a month in ${formatCalendarQuarter(latestRent.quarter_start)}${change}. ` +
+      "The chart shows when the rules started; the data cannot show why rents moved.";
+  }
+
+  const ruleCount = Object.keys(meta.policy_levers).length;
+  requireElement("levers-finding").textContent =
+    `${ruleCount} selected rules, at municipal, Catalan and national level. Each card says what the rule says, what this data shows and what it cannot show; ` +
+    "neither of the two coming elections decides all of them.";
+}
 
 /** A small "Contents" link that appears once the table of contents has
  *  scrolled out of view, so the reader can get back to the section list. */
@@ -166,6 +196,7 @@ async function main(): Promise<void> {
     loadRents(),
     loadTrends(),
   ]);
+  inSection("cities", () => renderSectionFindings(cities, rents, meta));
   inSection("flows", () => initFlows(transitions));
   inSection("flows", () => initExitGap(cities));
   inSection("cities", () => initCities(cities));

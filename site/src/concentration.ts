@@ -52,6 +52,14 @@ export function initConcentration(curves: Concentration): void {
   let top = DEFAULT_TOP;
   let render = () => {};
 
+  requireElement("concentration-finding").textContent =
+    `The largest ${DEFAULT_TOP}% of host accounts run ` +
+    CITIES.map((c) => ({ city: CITY_LABELS[c], share: listingShareAt(curves[c], DEFAULT_TOP) }))
+      .sort((a, b) => b.share - a.share)
+      .map((r) => `${formatPct(r.share, 0)} in ${r.city}`)
+      .join(", ") +
+    ` of ${POPULATION} (September 2026). An account is not necessarily one owner or one company.`;
+
   const points = CITIES.flatMap((city) =>
     curves[city].host_share.map((x, i) => ({ city: CITY_LABELS[city], x, y: curves[city].listing_share[i] ?? 0 })),
   ).filter((p) => p.x <= X_MAX);

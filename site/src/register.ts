@@ -30,6 +30,10 @@ export function initRegister(register: Register, places: NeighbourhoodRow[]): vo
       `of the register's ${formatInt(latest.register_numbers)} numbers are shown on at least one listing with open dates`,
     ],
   ];
+  requireElement("register-finding").textContent =
+    `${formatPct(latest.displayed_found_pct, 0)} of the licence numbers shown on listings with open dates exist in Barcelona's register of tourist flats, ` +
+    `and ${formatPct(latest.register_numbers_displayed_pct, 0)} of the register's numbers are shown on at least one such listing (${formatQuarter(latest.snapshot)} snapshot). ` +
+    "That is coverage of displayed numbers, not the share of licensed flats on Airbnb.";
   requireElement("register-stats").replaceChildren(
     ...tiles.map(([value, label]) => {
       const tile = el("div", { class: "stat" });
