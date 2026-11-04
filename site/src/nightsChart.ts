@@ -7,7 +7,7 @@ import * as Plot from "@observablehq/plot";
 import { mountChart, plotStyle, X_TITLE_MARGIN } from "./charts";
 import { CITY_LABELS, type Band, type City, type CityRow, type NightsRow } from "./data";
 import { cityControl, currentCity } from "./cityChoice";
-import { cssVar, el, formatInt, formatPct, POPULATION, requireElement, segmented, setDataTable } from "./ui";
+import { cssVar, el, formatInt, formatPct, POPULATION, requireElement, selectControl, setDataTable } from "./ui";
 
 const MAX_NIGHTS_SHOWN = 60; // longer minimum stays are summarised in the readout
 const CHART_HEIGHT = 320;
@@ -175,7 +175,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
   const roundGroup = el("div");
   function renderRoundControl(): void {
     roundGroup.replaceChildren(
-      segmented(
+      selectControl(
         "Snapshot",
         roundsFor(city).map((r) => ({ value: r, label: r })),
         round,
@@ -183,7 +183,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
           round = value;
           render();
         },
-      ),
+      ).element,
     );
   }
 

@@ -237,7 +237,7 @@ h2 {
 }
 
 #nights-controls {
-  min-height: 212px;
+  min-height: 68px;
 }
 
 .readout-line {
@@ -256,9 +256,6 @@ h2 {
     min-height: 3.4em;
   }
 
-  #nights-controls {
-    min-height: 66px;
-  }
 }
 
 /* "Method and limits": the long grey notes, one click away. */
@@ -315,6 +312,43 @@ h2 {
   font-family: var(--font-mono);
   font-size: 0.8rem;
   cursor: pointer;
+}
+
+/* A drop-down in place of a long button row. */
+.select-control select {
+  min-height: 44px;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: 0.85rem var(--font-mono);
+}
+
+.select-control select:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The nights chart's City and Snapshot sit side by side, even on a phone. */
+#nights-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 14px;
+}
+
+/* "Draw your own line" is the page's invitation, so its toggle looks like a control. */
+#nights-line > summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font: 0.85rem var(--font-mono);
 }
 
 .segmented button[aria-pressed="true"] {

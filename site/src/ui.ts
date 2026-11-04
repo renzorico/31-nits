@@ -79,6 +79,31 @@ export function segmented<V extends string>(
   return group;
 }
 
+/** A labelled drop-down: one control for many options, where a row of
+ *  buttons would take a phone's whole width. `select` is returned so
+ *  the caller can set its value from outside. */
+export function selectControl<V extends string>(
+  label: string,
+  options: Option<V>[],
+  initial: V,
+  onChange: (value: V) => void,
+): { element: HTMLElement; select: HTMLSelectElement } {
+  const group = el("div", { class: "control-group select-control" });
+  const id = `select-${label.toLowerCase().replace(/\W+/g, "-")}-${selectCount++}`;
+  group.append(el("label", { class: "control-label", for: id }, label));
+  const select = el("select", { id });
+  for (const option of options) {
+    const node = el("option", { value: option.value }, option.label);
+    if (option.value === initial) node.selected = true;
+    select.append(node);
+  }
+  select.addEventListener("change", () => onChange(select.value as V));
+  group.append(select);
+  return { element: group, select };
+}
+
+let selectCount = 0; // keeps each drop-down's id unique across sections
+
 /** A text alternative to a chart: the same figures as a table, scrollable
  *  and reachable by keyboard. Replaces any table already in `host`. */
 export function setDataTable(host: HTMLElement, caption: string, headers: string[], rows: string[][]): void {
