@@ -98,7 +98,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
         // Fixed: the Catalan tourist-stay limit (what it means is explained under the chart).
         Plot.text(
           shown.filter((b) => b.nights === stayLine),
-          { x: "nights", y: "share", text: () => (width < NARROW_WIDTH ? `Catalan limit: ${stayLine} days →` : `Catalan tourist-stay limit: ${stayLine} days →`), textAnchor: "end", dx: -6, fill: cssVar("--muted") },
+          { x: "nights", y: "share", text: () => (width < NARROW_WIDTH ? `${stayLine}-day limit →` : `Catalan tourist-stay limit: ${stayLine} days →`), textAnchor: "end", dx: -6, fill: cssVar("--muted"), stroke: cssVar("--bg"), strokeWidth: 3 },
         ),
         // Movable: the reader's own cutoff, drawn between two bars.
         Plot.ruleX([cutoff], {

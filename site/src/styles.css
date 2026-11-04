@@ -193,6 +193,10 @@ h2 {
   #nights-finding {
     min-height: 3.4em;
   }
+
+  #nights-controls {
+    min-height: 66px;
+  }
 }
 
 /* "Method and limits": the long grey notes, one click away. */
