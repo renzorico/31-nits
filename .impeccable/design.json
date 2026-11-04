@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-04T00:00:00Z",
+  "title": "Design System: The 31-Night Line",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#f5f1e8", "tonalRamp": ["#17150f", "#3a362b", "#5f594a", "#8a8372", "#b3ab98", "#d2cab6", "#e8e1d0", "#f5f1e8"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#1c1b18", "tonalRamp": ["#0d0d0b", "#1c1b18", "#34322d", "#4f4c45", "#6b665c", "#8f8a7e", "#b7b2a6", "#dcd8cd"] },
+      "accent-text": { "role": "primary", "displayName": "Burnt Link Orange", "canonical": "#b84a1a", "tonalRamp": ["#3a1708", "#5c250d", "#7e3412", "#9d3f16", "#b84a1a", "#d27a50", "#e5a888", "#f3d4c4"] },
+      "signal-orange": { "role": "primary", "displayName": "Signal Orange", "canonical": "#e4572e", "tonalRamp": ["#4a1a0d", "#74290f", "#a03c1a", "#c64a25", "#e4572e", "#ec8363", "#f3ac97", "#f9d6cb"] },
+      "under-31-slate": { "role": "secondary", "displayName": "Slate", "canonical": "#3f5468", "tonalRamp": ["#141b22", "#212e3a", "#2d3f4f", "#3f5468", "#5b7288", "#7f95a9", "#a9b9c7", "#d3dce4"] },
+      "exactly-31-sand": { "role": "secondary", "displayName": "Sand", "canonical": "#9a8f78", "tonalRamp": ["#2e2a20", "#4a4333", "#675f4a", "#7f7560", "#9a8f78", "#b5ac98", "#d0c9ba", "#e8e4da"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Page title only." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles (h2)." },
+      "title": { "displayName": "Title", "purpose": "Sub-headings and card titles (h3)." },
+      "body": { "displayName": "Body", "purpose": "Running text, capped at 68ch." },
+      "label": { "displayName": "Label", "purpose": "Kickers, control labels, chart axes." }
+    },
+    "shadows": [],
+    "motion": [],
+    "breakpoints": [
+      { "name": "tablet", "value": "640px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Segmented Button",
+      "kind": "button",
+      "refersTo": "segmented-button",
+      "description": "Toggle choice in a control group; fills with ink when pressed.",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-btn\" aria-pressed=\"true\">Barcelona</button><button class=\"ds-seg-btn\" aria-pressed=\"false\">Madrid</button></div>",
+      "css": ".ds-seg{display:flex;gap:6px}.ds-seg-btn{min-height:40px;padding:6px 12px;border:1px solid #ddd6c6;border-radius:3px;background:#fbf9f3;color:#1c1b18;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.8rem;cursor:pointer}.ds-seg-btn[aria-pressed='true']{background:#1c1b18;color:#f5f1e8;border-color:#1c1b18}.ds-seg-btn:focus-visible{outline:3px solid #b84a1a;outline-offset:2px}"
+    },
+    {
+      "name": "Stat Tile",
+      "kind": "card",
+      "refersTo": "stat-tile",
+      "description": "One big mono figure over a muted caption.",
+      "html": "<div class=\"ds-stat\"><strong>41.7%</strong><span>of Barcelona listings ask 31+ nights</span></div>",
+      "css": ".ds-stat{background:#fbf9f3;border:1px solid #ddd6c6;border-radius:3px;padding:14px 16px;font-family:'Public Sans',system-ui,sans-serif}.ds-stat strong{display:block;font-family:'JetBrains Mono',ui-monospace,monospace;font-weight:700;font-size:2rem;line-height:1.1;font-variant-numeric:tabular-nums;color:#1c1b18}.ds-stat span{color:#6b665c;font-size:.9rem}"
+    },
+    {
+      "name": "Policy Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Collapsible rule card: what it says / what the data shows / what it cannot show.",
+      "html": "<details class=\"ds-card\" open><summary><h3>Rent limit in stressed zones</h3><span class=\"ds-law\">Ley 12/2023</span></summary><dl><dt>What it says</dt><dd>A new lease cannot exceed the last rent.</dd></dl></details>",
+      "css": ".ds-card{background:#fbf9f3;border:1px solid #ddd6c6;border-radius:3px;padding:16px 18px;font-family:'Public Sans',system-ui,sans-serif;color:#1c1b18}.ds-card summary{cursor:pointer;min-height:44px}.ds-card summary:focus-visible{outline:3px solid #b84a1a;outline-offset:2px}.ds-card h3{display:inline;margin:0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:1.15rem}.ds-law{display:block;color:#6b665c;font-size:.85rem}.ds-card dl{margin:0}.ds-card dt{font:.75rem 'JetBrains Mono',ui-monospace,monospace;text-transform:uppercase;letter-spacing:.05em;color:#6b665c;margin-top:10px}.ds-card dd{margin:2px 0 0;font-size:.95rem}"
+    },
+    {
+      "name": "Method Disclosure",
+      "kind": "custom",
+      "refersTo": "disclosure",
+      "description": "Native details toggle in link orange, holding method and limits.",
+      "html": "<details class=\"ds-method\"><summary>Method and limits</summary><p>Population: listings with open dates.</p></details>",
+      "css": ".ds-method{font-family:'Public Sans',system-ui,sans-serif;color:#1c1b18}.ds-method summary{cursor:pointer;color:#b84a1a;font-size:.9rem;min-height:32px}.ds-method summary:focus-visible{outline:3px solid #b84a1a;outline-offset:2px}.ds-method p{color:#6b665c;font-size:.88rem}"
+    },
+    {
+      "name": "Contents Links",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Wrapped row of text links under the hero.",
+      "html": "<nav class=\"ds-toc\"><a href=\"#\">Minimum stays</a><a href=\"#\">Map</a><a href=\"#\">Flows</a></nav>",
+      "css": ".ds-toc{display:flex;flex-wrap:wrap;gap:0 14px;font-size:.85rem;font-family:'Public Sans',system-ui,sans-serif}.ds-toc a{color:#b84a1a;display:inline-flex;align-items:center;min-height:32px}.ds-toc a:focus-visible{outline:3px solid #b84a1a;outline-offset:2px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Open Ledger",
+    "overview": "A page that keeps its books where the reader can see them. Warm paper, ruled lines, tabular figures and mono headings make the site read like a ledger: every number sits on a line, with its denominator and its limits within reach. Nothing is lit, lifted or animated to persuade; the only loud thing on the page is one orange, and it marks what the reader should look at first.",
+    "keyCharacteristics": [
+      "Warm paper ground, near-black ink, one signal orange.",
+      "Mono headings and labels, sans body, tabular numerals for every figure.",
+      "Flat and ruled: 1px warm lines, no shadows.",
+      "Square-ish 3px corners on every control and container.",
+      "Light and dark schemes follow the system; chart colours keep their meaning across both."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "Orange means \"look here\": the over-31 group, Barcelona, the next link. It is never decorative, and no second accent hue competes with it.", "section": "colors" },
+      { "name": "The Same Colour Everywhere Rule", "body": "Under 31, exactly 31 and over 31 keep the same slate, sand and orange in every chart, legend, map layer and readout. A colour is never reassigned between sections.", "section": "colors" },
+      { "name": "The Tabular Figures Rule", "body": "Every number that can be compared uses tabular numerals so columns and changing values do not jitter.", "section": "typography" },
+      { "name": "The Mono For Marking Rule", "body": "Mono marks structure and measurement (headings, labels, figures, axes). Prose is always the sans.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "No shadows, glows or blurs. If something needs to stand out, change its fill or give it the orange, not elevation.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do use orange for exactly one job per view: the thing to read first.",
+      "Do keep the three minimum-stay colours the same in every chart, legend and map layer.",
+      "Do show numbers in tabular mono figures and keep each beside its denominator or limit.",
+      "Do separate sections with 1px Rule lines and a half-step Surface fill, not shadows.",
+      "Do keep touch targets at 40px (36px minimum on phones) and give every control a visible 3px focus outline.",
+      "Do reserve space (min-height) for anything that draws after data loads."
+    ],
+    "donts": [
+      "Don't add shadows, glows, gradients or blur anywhere.",
+      "Don't add a second accent hue, or use orange as body text colour.",
+      "Don't use round pills or large radii; 3px is the system.",
+      "Don't rely on hover for information; every tooltip has a tap or text equivalent.",
+      "Don't set prose in mono or headings in the sans.",
+      "Don't colour-code with red/green to imply good or bad; the palette is deliberately non-evaluative to match the site's neutrality."
+    ]
+  }
+}
