@@ -166,12 +166,17 @@ h2 {
   min-height: 320px;
 }
 
-#nights-controls {
-  min-height: 260px;
+#nights-finding {
+  min-height: 6.2em;
 }
 
-#nights-readout {
-  min-height: 7.5em;
+#nights-controls {
+  min-height: 212px;
+}
+
+.readout-line {
+  display: block;
+  margin-bottom: 0.4em;
 }
 
 .chart:empty::before {
@@ -185,12 +190,8 @@ h2 {
     min-height: 120px;
   }
 
-  #nights-controls {
-    min-height: 150px;
-  }
-
-  #nights-readout {
-    min-height: 5em;
+  #nights-finding {
+    min-height: 3.4em;
   }
 }
 

@@ -24,6 +24,8 @@ interface Bar {
 export function initNightsChart(rows: NightsRow[], stayLine: number, cities: CityRow[]): void {
   const chart = requireElement<HTMLDivElement>("nights-chart");
   const controls = requireElement<HTMLDivElement>("nights-controls");
+  const lineControls = requireElement<HTMLDivElement>("nights-line-controls");
+  const finding = requireElement<HTMLParagraphElement>("nights-finding");
   const readout = requireElement<HTMLParagraphElement>("nights-readout");
   const robustness = requireElement<HTMLParagraphElement>("nights-robustness");
   const tableHost = requireElement("nights-table");
@@ -32,7 +34,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
 
   let city: City = currentCity();
   let round = roundsFor(city).at(-1) ?? "";
-  let cutoff = stayLine; // the reader's exploration cutoff; starts at the legal limit
+  let cutoff = stayLine; // the reader's own line; starts at the legal limit
   let render = () => {}; // replaced by mountChart below
 
   const bandOf = (nights: number): Band => (nights < stayLine ? "under_31" : nights === stayLine ? "exactly_31" : "over_31");
@@ -56,6 +58,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
   function draw(width: number): Element {
     const { shown, total, beyond } = bars();
     updateReadout(shown, total, beyond);
+    updateFinding(shown, total, beyond);
     const tickStep = width < NARROW_WIDTH ? 10 : 5;
     const tipText = (d: Bar) =>
       [
@@ -142,16 +145,31 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
     );
     const atOrBelow = shown.filter((b) => b.nights <= cutoff).reduce((s, b) => s + b.listings, 0);
     const nearCutoff = shown.filter((b) => b.nights === cutoff || b.nights === cutoff + 1).reduce((s, b) => s + b.listings, 0);
-    readout.replaceChildren(
-      document.createTextNode(`${CITY_LABELS[city]}, ${round}. With your exploration cutoff after ${cutoff} nights: `),
+    const split = el("span", { class: "readout-line" });
+    split.append(
+      document.createTextNode(`${CITY_LABELS[city]}, ${round}. A line after ${cutoff} nights: `),
       el("strong", {}, formatPct((atOrBelow / total) * 100)),
       document.createTextNode(` of ${POPULATION} ask ${cutoff} nights or fewer and `),
       el("strong", {}, formatPct(((total - atOrBelow) / total) * 100)),
-      document.createTextNode(
-        ` ask more${beyond ? ` (${formatInt(beyond)} ask more than ${MAX_NIGHTS_SHOWN} nights)` : ""}. ` +
-          `${formatPct((nearCutoff / total) * 100)} sit within one night of your cutoff (${cutoff} or ${cutoff + 1}).`,
-      ),
+      document.createTextNode(` ask more${beyond ? ` (${formatInt(beyond)} ask more than ${MAX_NIGHTS_SHOWN} nights)` : ""}.`),
     );
+    const near = el(
+      "span",
+      { class: "readout-line" },
+      `${formatPct((nearCutoff / total) * 100)} sit within one night of that line (${cutoff} or ${cutoff + 1}).`,
+    );
+    readout.replaceChildren(split, near);
+  }
+
+  /** The finding, stated before any control: computed from the same bars. */
+  function updateFinding(shown: Bar[], total: number, beyond: number): void {
+    const asking = (test: (nights: number) => boolean) =>
+      shown.filter((b) => test(b.nights)).reduce((s, b) => s + b.listings, 0);
+    const monthPlus = asking((n) => n >= stayLine) + beyond;
+    const onTheLine = asking((n) => n === stayLine || n === stayLine + 1);
+    finding.textContent =
+      `In ${CITY_LABELS[city]} (${round}), ${formatPct((monthPlus / total) * 100)} of ${POPULATION} ask for ${stayLine} nights or more, ` +
+      `and ${formatPct((onTheLine / total) * 100)} ask for exactly ${stayLine} or ${stayLine + 1}, either side of the Catalan limit.`;
   }
 
   const roundGroup = el("div");
@@ -170,7 +188,7 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
   }
 
   const sliderGroup = el("div", { class: "control-group wide" });
-  const sliderLabel = el("label", { class: "control-label", for: "line-slider" }, "Exploration cutoff: after … nights");
+  const sliderLabel = el("label", { class: "control-label", for: "line-slider" }, "Your line: after … nights");
   const slider = el("input", {
     id: "line-slider",
     type: "range",
@@ -198,8 +216,8 @@ export function initNightsChart(rows: NightsRow[], stayLine: number, cities: Cit
       render();
     }),
     roundGroup,
-    sliderGroup,
   );
+  lineControls.append(sliderGroup);
   renderRoundControl();
   render = mountChart(chart, draw);
 }

@@ -55,21 +55,26 @@
     <main id="main" tabindex="-1">
       <section id="nights" aria-labelledby="nights-title">
         <h2 id="nights-title">Where would you draw the line?</h2>
+        <p class="lede" id="nights-finding" aria-live="polite"></p>
         <p>
           Each bar is the share of listings asking that minimum stay: slate under 31 nights, sand
-          exactly 31, orange over 31. In Barcelona they pile up at 31 and 32.
+          exactly 31, orange over 31.
         </p>
         <div class="chart" id="nights-chart" role="img"></div>
         <div class="controls" id="nights-controls"></div>
-        <p class="readout" id="nights-readout" aria-live="polite"></p>
+        <details class="method" id="nights-line">
+          <summary>Draw your own line</summary>
+          <div class="controls" id="nights-line-controls"></div>
+          <p class="readout" id="nights-readout" aria-live="polite"></p>
+        </details>
         <details class="method" id="nights-table">
           <summary>Show the chart as a table</summary>
         </details>
         <details class="method">
           <summary>Method and limits</summary>
           <p class="note">
-            The label marks the Catalan tourist-stay limit. The exploration cutoff shows how many
-            listings sit on each side of any number of nights.
+            The label marks the Catalan tourist-stay limit. “Draw your own line” shows how many
+            listings sit on each side of any number of nights; its dashed line starts at the limit.
           </p>
           <p class="note" id="nights-robustness"></p>
           <p class="note">
