@@ -275,17 +275,22 @@ POLICY_LEVERS = {
 POST_OBSERVATION_DEVELOPMENTS = [
     {
         "date": "2026-10-07",
-        "title": "Real Decreto-ley 29/2026: urgent housing measures",
+        "title": "Real Decreto-ley 29/2026: national housing decree",
         "summary": (
             "Amends the national tenancy law (LAU) on temporary and room "
             "rentals: a temporary lease needs a real, provable reason for the "
-            "tenant to live away from their habitual home. It also caps "
-            "annual rent increases until 31 Dec 2027."
+            "tenant to live away from their habitual home and must run more "
+            "than 31 days and, as a rule, no more than 12 months; in stressed "
+            "zones the rent limits of LAU art. 17 apply to it. It also caps "
+            "annual rent updates at 2% until 31 Dec 2027."
         ),
         "note": (
             "Published after every snapshot used here, so it cannot explain "
-            "any change in the data. Summary read from the BOE page; the full "
-            "text and its parliamentary validation were not reviewed."
+            "any change in the data. A decree-law must be validated by "
+            "Congress within 30 days; with the Cortes dissolved, the vote fell "
+            "to the Diputación Permanente, scheduled for 12 Nov 2026. Its "
+            "result was not checked here. Summary read from the BOE text "
+            "(BOE-A-2026-20823, 7 Oct 2026)."
         ),
         "url": "https://www.boe.es/buscar/doc.php?id=BOE-A-2026-20823",
     }

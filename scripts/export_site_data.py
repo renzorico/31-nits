@@ -122,6 +122,7 @@ def meta() -> dict:
         "post_observation_developments": cfg.POST_OBSERVATION_DEVELOPMENTS,
         "context_events": cfg.CONTEXT_EVENTS,
         "stay_line_nights": cfg.STAY_LINE_NIGHTS,
+        "professional_min": cfg.PROFESSIONAL_MIN,
         "sources": [
             {
                 "title": "Inside Airbnb",

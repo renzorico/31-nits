@@ -53,6 +53,7 @@ export interface Meta {
   post_observation_developments: LaterDevelopment[];
   context_events: Record<string, string>;
   stay_line_nights: number;
+  professional_min: number;
   sources: Source[];
   caveats: string[];
 }

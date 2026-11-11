@@ -1,12 +1,5 @@
-import "@fontsource/jetbrains-mono/latin-400.css";
-import "@fontsource/jetbrains-mono/latin-600.css";
-import "@fontsource/jetbrains-mono/latin-700.css";
-import "@fontsource/public-sans/latin-400.css";
-import "@fontsource/public-sans/latin-600.css";
 import "./styles.css";
 
-import { initCities } from "./cities";
-import { initConcentration } from "./concentration";
 import {
   CITIES,
   CITY_LABELS,
@@ -19,210 +12,115 @@ import {
   loadRents,
   loadTransitions,
   loadTrends,
-  type City,
   type CityRow,
   type Meta,
-  type RentRow,
+  type Register,
 } from "./data";
-import { initExitGap, initFlows } from "./flows";
-import { initLevers } from "./levers";
-import { initRegister } from "./register";
-import { initRents } from "./rents";
-import { initNightsChart } from "./nightsChart";
-import { el, formatCalendarQuarter, formatInt, formatPct, POPULATION, requireElement } from "./ui";
+import { initFlowsScreen, initGapScreen } from "./flowsScreen";
+import { initHosts } from "./hosts";
+import { initLicences } from "./licences";
+import { initMapScreen } from "./mapScreen";
+import { initPrice } from "./price";
+import { initRegisterScreen } from "./registerScreen";
+import { initRents } from "./rentsScreen";
+import { initRules } from "./rules";
+import { byId, formatInt, initPager, initProgress, monthYear, pct, redrawOnResize, safely, setHtml, type Draw } from "./story";
+import { initWall } from "./wall";
 
-const FIRST_ROUND = "Dec 2025";
 const LATEST_ROUND = "Sep 2026";
 const REPOSITORY_URL = "https://github.com/renzorico/spain-housing-str-analysis";
 
-/** The one-sentence findings of the sections that start collapsed, computed
- *  from the same exported data as their charts. */
-function renderSectionFindings(cities: CityRow[], rents: RentRow[], meta: Meta): void {
-  const monthPlus = (city: City, round: string) => cities.find((c) => c.city === city)?.rounds[round]?.share_month_plus;
-  const moves = CITIES.flatMap((city) => {
-    const first = monthPlus(city, FIRST_ROUND);
-    const last = monthPlus(city, LATEST_ROUND);
-    return first === undefined || last === undefined ? [] : [`${CITY_LABELS[city]} ${formatPct(first)} to ${formatPct(last)}`];
-  });
-  requireElement("cities-finding").textContent =
-    `Share of ${POPULATION} asking for 31 nights or more, ${FIRST_ROUND} to ${LATEST_ROUND}: ${moves.join("; ")}. ` +
-    "The scrapes were on different days, and the other cities have only these two snapshots.";
+function renderHero(cities: CityRow[], register: Register, meta: Meta): void {
+  const line = meta.stay_line_nights;
+  const share = (c: CityRow) => c.rounds[LATEST_ROUND]?.share_month_plus ?? 0;
+  const bcn = cities.find((c) => c.city === "barcelona");
+  if (!bcn) return;
+  const bcnRound = bcn.rounds[LATEST_ROUND];
+  const others = cities.filter((c) => c.city !== "barcelona");
+  const lo = Math.min(...others.map(share));
+  const hi = Math.max(...others.map(share));
+  const inTen = Math.round(share(bcn) / 10);
+  const latestRegister = register.match.at(-1);
 
-  const latestRent = rents.at(-1);
-  if (latestRent) {
-    const change =
-      latestRent.yoy_pct === null ? "" : `, ${latestRent.yoy_pct >= 0 ? "up" : "down"} ${formatPct(Math.abs(latestRent.yoy_pct))} on a year earlier`;
-    requireElement("rents-finding").textContent =
-      `The average rent of new leases in Barcelona was €${formatInt(Math.round(latestRent.avg_rent))} a month in ${formatCalendarQuarter(latestRent.quarter_start)}${change}. ` +
-      "The chart shows when the rules started; the data cannot show why rents moved.";
-  }
-
-  const ruleCount = Object.keys(meta.policy_levers).length;
-  requireElement("levers-finding").textContent =
-    `${ruleCount} selected rules, at municipal, Catalan and national level. Each card says what the rule says, what this data shows and what it cannot show; ` +
-    "neither of the two coming elections decides all of them.";
-}
-
-/** A small "Contents" link that appears once the table of contents has
- *  scrolled out of view, so the reader can get back to the section list. */
-function initContentsLink(): void {
-  const link = requireElement<HTMLAnchorElement>("to-contents");
-  const toc = requireElement("toc");
-  let tocAbove = false; // the contents have scrolled off the top
-  let scrollingUp = false;
-  const update = () => {
-    link.hidden = !(tocAbove && scrollingUp);
-  };
-  new IntersectionObserver((entries) => {
-    const entry = entries.at(-1);
-    if (!entry) return;
-    tocAbove = !entry.isIntersecting && entry.boundingClientRect.top < 0;
-    update();
-  }).observe(toc);
-  // Shown only while scrolling up, which is when someone is heading back:
-  // scrolling down it would sit on top of the text being read.
-  let lastY = window.scrollY;
-  window.addEventListener(
-    "scroll",
-    () => {
-      const y = window.scrollY;
-      if (Math.abs(y - lastY) < 6) return;
-      scrollingUp = y < lastY;
-      lastY = y;
-      update();
-    },
-    { passive: true },
+  byId("hero-title").innerHTML = `<em>${inTen} in 10</em> Barcelona Airbnb listings ask guests to stay a month or more.`;
+  setHtml(
+    "hero-lede",
+    `In Catalonia a tourist stay is legally ${line} days or fewer. In ${LATEST_ROUND}, ${pct(share(bcn))} of Barcelona's Airbnb listings with open dates asked for a minimum of ${line} nights or more, ` +
+      `against ${pct(lo)}–${pct(hi)} in ${others.map((c) => CITY_LABELS[c.city]).join(", ").replace(/, ([^,]*)$/, " and $1")}. ` +
+      "What that shows about the housing rules, and what it cannot.",
   );
-}
-
-/** The five cities side by side: share of listings asking 31+ nights.
- *  Bars share one 0-100% scale; Barcelona is listed first, the rest by value. */
-function renderHeroStats(cities: CityRow[]): void {
-  const rows = CITIES.map((city) => ({
-    city,
-    share: cities.find((c) => c.city === city)?.rounds[LATEST_ROUND]?.share_month_plus,
-  })).filter((row): row is { city: City; share: number } => row.share !== undefined);
-  if (rows.length === 0) return;
-  const ordered = [
-    ...rows.filter((row) => row.city === "barcelona"),
-    ...rows.filter((row) => row.city !== "barcelona").sort((a, b) => b.share - a.share),
+  const stats: [string, string][] = [
+    [formatInt(bcnRound?.active ?? 0), `Barcelona listings with open dates, ${LATEST_ROUND}`],
+    [pct(share(bcn)), `ask for ${line}+ nights`],
+    [`${pct(lo, 0)}–${pct(hi, 0)}`, "the same share in Madrid, Valencia, Málaga, Sevilla"],
+    [formatInt(latestRegister?.register_records ?? 0), "tourist flats on the city's official register"],
   ];
-
-  const caption = el("p", { class: "city-bars-caption" }, `Share of ${POPULATION} asking for 31 nights or more, ${LATEST_ROUND}`);
-  const list = el("ul", { class: "city-bars-list" });
-  for (const { city, share } of ordered) {
-    const item = el("li", { class: city === "barcelona" ? "city-bar is-focus" : "city-bar" });
-    const bar = el("span", { class: "city-bar-track", "aria-hidden": "true" });
-    const fill = el("span", { class: "city-bar-fill" });
-    fill.style.width = `${share}%`;
-    bar.append(fill);
-    item.append(el("span", { class: "city-bar-name" }, CITY_LABELS[city]), bar, el("strong", {}, formatPct(share)));
-    list.append(item);
-  }
-  requireElement("hero-stats").replaceChildren(caption, list);
+  byId("hero-stats").innerHTML = stats.map(([n, label]) => `<div class="stat"><b>${n}</b><span>${label}</span></div>`).join("");
 }
 
-function renderFooter(meta: Meta): void {
-  requireElement("sources").replaceChildren(
-    ...meta.sources.map((source) => {
-      const item = el("li");
-      item.append(el("a", { href: source.url, rel: "noopener" }, source.title), document.createTextNode(` (${source.licence})`));
-      return item;
-    }),
-  );
-  requireElement("caveats").replaceChildren(...meta.caveats.map((text) => el("li", {}, text)));
-
-  const footer = requireElement("footer-links");
-  footer.append(
-    document.createTextNode("Method, code and every number: "),
-    el("a", { href: REPOSITORY_URL, rel: "noopener" }, "the repository"),
-    document.createTextNode(
-      ` (notebooks, tests and the exported data). Data exported ${meta.generated}; rules checked against the official gazettes on ${meta.levers_as_of}. Data licensed CC BY 4.0.`,
-    ),
-  );
-}
-
-function showError(error: unknown): void {
-  const message = error instanceof Error ? error.message : String(error);
-  document.querySelector("main")?.prepend(el("p", { class: "note", role: "alert" }, `Could not load the data: ${message}`));
-}
-
-/** Run one section's setup; if it fails, say so in that section only,
- *  so the rest of the page still works. */
-function inSection(sectionId: string, setup: () => void): void {
-  try {
-    setup();
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Section #${sectionId} failed`, error);
-    requireElement(sectionId).append(el("p", { class: "note", role: "alert" }, `This chart could not be drawn: ${message}`));
-  }
-}
-
-/** A link to a collapsed section (the contents line, or a shared URL) opens it. */
-function openSectionFromHash(): void {
-  const target = document.getElementById(window.location.hash.slice(1));
-  const details = target?.querySelector(":scope > details");
-  if (details instanceof HTMLDetailsElement) details.open = true;
-}
-
-// A printed page has no way to click open: show every section.
-window.addEventListener("beforeprint", () => {
-  document.querySelectorAll("details").forEach((details) => {
-    details.open = true;
-  });
-});
-
-// MapLibre is most of the JavaScript, so it is only downloaded when the
-// reader scrolls near the map.
-const MAP_PRELOAD_MARGIN = "600px";
-
-function loadMapWhenNear(snapshots: string[]): void {
-  const section = requireElement("map-section");
-  const load = () => import("./map").then(({ initMap }) => initMap(snapshots)).catch(showError);
-  // Already close (e.g. a link straight to #map-section): load now rather
-  // than wait for the observer's first callback.
-  if (section.getBoundingClientRect().top < window.innerHeight + parseInt(MAP_PRELOAD_MARGIN, 10)) {
-    void load();
-    return;
-  }
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      observer.disconnect();
-      void load();
-    },
-    { rootMargin: MAP_PRELOAD_MARGIN },
-  );
-  observer.observe(section);
+function renderMethod(meta: Meta, cities: CityRow[]): void {
+  const snapshots = Object.values(meta.snapshots).reduce((n, s) => n + s.length, 0);
+  const steps: [string, string][] = [
+    ["Download", `${snapshots} Inside Airbnb snapshots for ${CITIES.length} cities, the city's tourist-flat register, and official rents.`],
+    ["Count", "Only listings with at least one open date in the next year, so dormant ones do not inflate the totals."],
+    ["Classify", `Each listing by the minimum stay it asks: under ${meta.stay_line_nights}, exactly ${meta.stay_line_nights}, or over. Never by legality.`],
+    ["Match", "Licence numbers shown on listings against the register, as numbers, never as addresses."],
+    ["Compare", "Cities with intervals that resample whole host accounts, so one large operator cannot fake a pattern."],
+    ["Publish", "Tests check that no host, listing or address can be identified in the published data."],
+  ];
+  byId("pipeline").innerHTML = steps.map(([b, t]) => `<li><b>${b}</b>${t}</li>`).join("");
+  byId("caveats").innerHTML = meta.caveats.map((c) => `<li>${c}</li>`).join("");
+  byId("sources").innerHTML = meta.sources
+    .map((s) => `<li><a href="${s.url}" target="_blank" rel="noopener">${s.title}</a> (${s.licence})</li>`)
+    .join("");
+  const sizes = cities.map((c) => `${CITY_LABELS[c.city]} ${formatInt(c.rounds[LATEST_ROUND]?.active ?? 0)}`).join(", ");
+  byId("endnote-caveat").textContent =
+    `Listings with open dates in the ${LATEST_ROUND} snapshots: ${sizes}. A minimum stay is a setting, not a stay; a missing licence number is not proof of a breach; comparisons show timing and differences, not causes.`;
+  byId("footer-links").innerHTML =
+    `<span>Data as of ${monthYear(meta.observation_window[1])}; rules checked ${meta.levers_as_of}.</span>` +
+    `<span>Code, notebooks and corrections: <a href="${REPOSITORY_URL}" target="_blank" rel="noopener">GitHub</a></span>` +
+    "<span>Data: Inside Airbnb, Ajuntament de Barcelona, Generalitat de Catalunya (CC BY 4.0)</span>";
 }
 
 async function main(): Promise<void> {
-  initContentsLink();
-  openSectionFromHash();
-  window.addEventListener("hashchange", openSectionFromHash);
-  const [meta, nights, cities, register] = await Promise.all([loadMeta(), loadNights(), loadCities(), loadRegister()]);
-  renderHeroStats(cities);
-  renderFooter(meta);
-  initNightsChart(nights, meta.stay_line_nights, cities);
-  loadMapWhenNear(meta.snapshots.barcelona);
-
-  // The sections below the map: small files, loaded together.
-  const [transitions, concentration, places, rents, trends] = await Promise.all([
+  initPager();
+  initProgress();
+  const [meta, nights, cities, register, transitions, concentration, neighbourhoods, rents, trends] = await Promise.all([
+    loadMeta(),
+    loadNights(),
+    loadCities(),
+    loadRegister(),
     loadTransitions(),
     loadConcentration(),
     loadNeighbourhoods(),
     loadRents(),
     loadTrends(),
   ]);
-  inSection("cities", () => renderSectionFindings(cities, rents, meta));
-  inSection("flows", () => initFlows(transitions));
-  inSection("flows", () => initExitGap(cities));
-  inSection("cities", () => initCities(cities));
-  inSection("concentration", () => initConcentration(concentration));
-  inSection("register", () => initRegister(register, places));
-  inSection("rents", () => initRents(rents, meta));
-  inSection("levers", () => initLevers({ meta, register, rents, trends, cities }));
+  const line = meta.stay_line_nights;
+  renderHero(cities, register, meta);
+  renderMethod(meta, cities);
+
+  const draws: Draw[] = [
+    safely("wall", initWall(nights, line)),
+    safely("price", initPrice(nights, line)),
+    safely("flows", initFlowsScreen(transitions, line)),
+    safely("gap", initGapScreen(cities)),
+    safely("licences", initLicences(trends)),
+    safely("register", initRegisterScreen(register, meta.policy_levers.tourist_licence_phase_out)),
+    safely("hosts", initHosts(concentration, cities, meta.professional_min)),
+    safely("rents", initRents(rents, meta)),
+    safely("rules", initRules({ meta, register, rents, trends, cities })),
+  ];
+  const drawAll = () => draws.forEach((draw) => draw());
+  drawAll();
+  redrawOnResize(drawAll);
+  initMapScreen(meta.snapshots.barcelona, neighbourhoods, line).catch((error: unknown) => {
+    console.error("Map failed to load", error);
+    byId("map").textContent = "The map could not load. The figures above do not depend on it.";
+  });
 }
 
-main().catch(showError);
+main().catch((error: unknown) => {
+  console.error(error);
+  byId("hero-lede").textContent = "The data could not load. Please reload the page.";
+});

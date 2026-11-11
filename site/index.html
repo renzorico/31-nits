@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>The 31-Night Line</title>
+    <title>The 31-Night Line: Barcelona's Airbnb listings and the housing rules</title>
     <meta
       name="description"
-      content="Short-term rentals and housing rules in Barcelona and four Spanish cities: what the data shows, and what it cannot show."
+      content="Barcelona's Airbnb listings split in two: one night, or a month and more. What four quarterly snapshots, the tourist-flat register and official rents show about the housing rules, and what they cannot show."
     />
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0f0f0e" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href="__SITE_URL__" />
 
@@ -18,7 +19,7 @@
     <meta property="og:title" content="The 31-Night Line" />
     <meta
       property="og:description"
-      content="42% of Barcelona's Airbnb listings with open dates ask for 31+ nights, against 2–8% in four other Spanish cities. What the data shows about the housing rules, and what it cannot show."
+      content="41.7% of Barcelona's Airbnb listings with open dates ask for 31 nights or more, against 2–8% in four other Spanish cities. What the data shows about the housing rules, and what it cannot show."
     />
     <meta property="og:image" content="__SITE_URL__og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -31,216 +32,179 @@
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to the content</a>
-    <a class="to-contents" id="to-contents" href="#toc" hidden>Contents ↑</a>
-    <header class="hero">
-      <p class="kicker">Barcelona and four Spanish cities · Dec 2025 – Sep 2026</p>
-      <h1>The 31-night line</h1>
-      <p class="lede">
-        In Catalonia, a tourist stay is 31 days or fewer. Where do Airbnb listings' minimum stays
-        sit against that line? A minimum stay is a setting hosts choose, not an actual stay or a
-        legal finding.
-      </p>
-      <div class="city-bars" id="hero-stats" aria-live="polite"></div>
-      <nav class="toc" id="toc" aria-label="Sections">
-        <a href="#nights">Minimum stays</a>
-        <a href="#map-section">Map</a>
-        <a href="#flows">Flows</a>
-        <a href="#cities">Cities</a>
-        <a href="#concentration">Hosts</a>
-        <a href="#register">Register</a>
-        <a href="#rents">Rents</a>
-        <a href="#levers">Rules</a>
-      </nav>
-    </header>
+    <div class="banner" id="banner">
+      <span class="note"><b>The 31-Night Line</b> · Airbnb in Barcelona and four Spanish cities, Dec 2025 – Sep 2026</span>
+      <span class="progress" id="progress" aria-hidden="true"></span>
+    </div>
+    <div id="tip" role="status" aria-live="polite"></div>
 
     <main id="main" tabindex="-1">
-      <section id="nights" aria-labelledby="nights-title">
-        <h2 id="nights-title">Where would you draw the line?</h2>
-        <p class="lede" id="nights-finding" aria-live="polite"></p>
-        <p>
-          Each bar is the share of listings asking that minimum stay: slate under 31 nights, sand
-          exactly 31, orange over 31. “Open dates” means a listing has at least one date open to
-          book in the next 365 days.
-        </p>
-        <div class="chart" id="nights-chart" role="img"></div>
-        <div class="controls" id="nights-controls"></div>
-        <details class="method" id="nights-line">
-          <summary>Draw your own line</summary>
-          <div class="controls" id="nights-line-controls"></div>
-          <p class="readout" id="nights-readout" aria-live="polite"></p>
-        </details>
-        <details class="method" id="nights-table">
-          <summary>Show the chart as a table</summary>
-        </details>
-        <details class="method">
-          <summary>Method and limits</summary>
-          <p class="note">
-            The label marks the Catalan tourist-stay limit. “Draw your own line” shows how many
-            listings sit on each side of any number of nights; its dashed line starts at the limit.
-          </p>
-          <p class="note" id="nights-robustness"></p>
-          <p class="note">
-            Why 31? A tourist stay is “a continuous period of 31 days or fewer” (Decret 75/2020, art.
-            221-1). Whether a 31-<em>night</em> booking counts as 31 days or fewer is ambiguous, so
-            listings asking exactly 31 are shown on their own. A minimum stay is what a host asks,
-            not how long guests stay or how a stay is classified in law. Other regions draw their
-            lines differently, so across cities 31+ is only a common measurement threshold.
-          </p>
-        </details>
+      <section class="screen hero" id="top" aria-labelledby="hero-title">
+        <p class="eyebrow">Short-term rentals · housing rules · open data</p>
+        <h1 id="hero-title">4 in 10 Barcelona Airbnb listings ask for a month or more.</h1>
+        <p class="lede" id="hero-lede"></p>
+        <div class="stats" id="hero-stats" aria-live="polite"></div>
+        <p class="scroll-hint" aria-hidden="true">Scroll ↓</p>
       </section>
 
-      <section id="map-section" aria-labelledby="map-title">
-        <h2 id="map-title">Every listing with open dates in Barcelona</h2>
-        <p>
-          Colour the map by minimum stay, by the licence a listing shows, or by how many listings its
-          host account runs. Switch quarters to see the market change. Tap a dot for details, or a legend entry
-          to hide or show that group.
-        </p>
-        <div class="controls" id="map-controls"></div>
-        <div class="map-wrap">
-          <div id="map" aria-label="Map of Airbnb listings with open dates in Barcelona"></div>
-          <div class="legend" id="map-legend"></div>
+      <section class="screen" id="wall" aria-labelledby="wall-title">
+        <div class="wrap head">
+          <h2 id="wall-title"></h2>
+          <p class="sub" id="wall-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="wall-how"></p>
+          </details>
         </div>
-        <p class="note">
-          The data comes from Inside Airbnb, an independent project that publishes scraped Airbnb
-          listings. Its points are offset by up to 150 m to protect hosts'
-          privacy. No host or listing is identified on this page. Dot details open on a click or
-          tap; the neighbourhood table in the register section gives the same figures without the map.
-        </p>
+        <ul class="legend" id="wall-legend"></ul>
+        <div class="fill" id="wall-chart" role="img"></div>
       </section>
 
-      <section id="flows" class="more" aria-labelledby="flows-title">
-        <h2 id="flows-title">Where did December's listings go?</h2>
-        <p class="finding" id="flows-finding" aria-live="polite"></p>
-        <details>
-          <summary>Show the chart and how it was checked</summary>
-          <p>
-            Inside Airbnb keeps the same id for a listing across snapshots, so each listing with open
-            dates in December 2025 can be followed. By September it is in the same band, has switched
-            band, is still listed without open dates, or is absent (withdrawn, re-listed under a new
-            id, or missed: the file cannot say which).
-          </p>
-          <div class="controls" id="flows-controls"></div>
-          <div class="chart" id="flows-chart" role="img"></div>
-          <h3>Is Barcelona different?</h3>
-          <p>
-            Month-plus listings (31+ nights) were more likely than shorter-stay ones to be absent from
-            the later scrape in Barcelona. Catalonia extended its rent limit to seasonal lets on 1
-            January 2026. The check: the same gap in cities where that law does not apply, with
-            uncertainty that allows for one operator withdrawing many listings at once.
-          </p>
-          <div class="chart" id="gap-chart" role="img"></div>
-          <div class="readout" id="gap-readout"></div>
-        </details>
-      </section>
-
-      <section id="cities" class="more" aria-labelledby="cities-title">
-        <h2 id="cities-title">Five cities, two snapshots</h2>
-        <p class="finding" id="cities-finding" aria-live="polite"></p>
-        <details>
-          <summary>Show the chart</summary>
-          <p>Only listings with open dates are counted.</p>
-          <div class="controls" id="cities-controls"></div>
-          <div class="chart" id="cities-chart" role="img"></div>
-          <p class="note" id="cities-note"></p>
-        </details>
-      </section>
-
-      <section id="concentration" class="more" aria-labelledby="concentration-title">
-        <h2 id="concentration-title">Who supplies the market?</h2>
-        <p class="finding" id="concentration-finding" aria-live="polite"></p>
-        <details>
-          <summary>Show the chart and the slider</summary>
-          <p>
-            Host accounts ranked from largest to smallest. If every account ran the same number, the
-            curve would be the diagonal.
-          </p>
-          <div class="controls" id="concentration-controls"></div>
-          <div class="chart" id="concentration-chart" role="img"></div>
-          <p class="readout" id="concentration-readout" aria-live="polite"></p>
-        </details>
-      </section>
-
-      <section id="register" class="more" aria-labelledby="register-title">
-        <h2 id="register-title">Licences on paper, listings online</h2>
-        <p class="finding" id="register-finding" aria-live="polite"></p>
-        <details>
-          <summary>Show the chart and method</summary>
-          <p>
-            Barcelona publishes its register of tourist flats (HUT) every quarter. It is the legal
-            count of licences, which Airbnb listings are not.
-          </p>
-          <div class="stats" id="register-stats"></div>
-          <div class="chart" id="register-chart" role="img"></div>
-          <p class="note">
-            One dot per neighbourhood, September 2026. Dots above the diagonal have more listings with
-            open dates than registered flats. Colour shows the share of listings asking 31+ nights.
-            Grey dots have no listings.
-          </p>
-          <details class="method" id="register-table">
-            <summary>Show the chart as a table</summary>
+      <section class="screen" id="price" aria-labelledby="price-title">
+        <div class="wrap head">
+          <h2 id="price-title"></h2>
+          <p class="sub" id="price-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="price-how"></p>
           </details>
-          <details class="method">
-            <summary>Method and limits</summary>
-            <p class="note">
-              Units differ on purpose: the register counts records, the matching counts licence
-              numbers, and the Airbnb side counts listings. A match shows that a number exists in the
-              register; it does not show that the listing is that flat, and it cannot show how many
-              licensed flats are absent from Airbnb (they may let elsewhere, or not at all). Each
-              snapshot is compared with the register quarter nearest in time; the June snapshot uses
-              Q1 because Q2 is not published. A minimum stay is a setting, not proof of how a flat is
-              let.
+        </div>
+        <ul class="legend" id="price-legend"></ul>
+        <div class="fill" id="price-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="map-screen" aria-labelledby="map-title">
+        <div class="wrap head">
+          <h2 id="map-title"></h2>
+          <p class="sub" id="map-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p>
+              Inside Airbnb, an independent project, publishes scraped Airbnb listings. It offsets each
+              point by up to 150 m to protect hosts' privacy, so a dot is never an address. No host or
+              listing is identified on this page. District shares are computed from the neighbourhood
+              figures the map export also uses.
             </p>
-            <p class="note" id="register-reconciliation"></p>
           </details>
-        </details>
+        </div>
+        <ul class="legend" id="map-legend"></ul>
+        <div class="fill map-fill" id="map-chart">
+          <div id="map" role="img" aria-label="Map of Barcelona's Airbnb listings with open dates, coloured by minimum stay"></div>
+        </div>
       </section>
 
-      <section id="rents" class="more" aria-labelledby="rents-title">
-        <h2 id="rents-title">What rents did</h2>
-        <p class="finding" id="rents-finding" aria-live="polite"></p>
-        <details>
-          <summary>Show the chart</summary>
-          <p>
-            The average monthly rent of new leases, from the deposits landlords lodge with the Catalan
-            housing agency. Dashed lines mark when the rent limit and its extension to seasonal lets
-            started.
-          </p>
-          <div class="controls" id="rents-controls"></div>
-          <div class="chart" id="rents-chart" role="img"></div>
-          <p class="note">
-            The timing is shown; the cause is not. Interest rates, wages, supply and the mix of flats
-            rented all move the average. The vertical axis of the first view starts at €900, not zero,
-            which makes the swings look larger than they are.
-          </p>
-        </details>
+      <section class="screen" id="flows" aria-labelledby="flows-title">
+        <div class="wrap head">
+          <h2 id="flows-title"></h2>
+          <p class="sub" id="flows-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="flows-how"></p>
+          </details>
+        </div>
+        <ul class="legend" id="flows-legend"></ul>
+        <div class="fill" id="flows-chart" role="img"></div>
       </section>
 
-      <section id="levers" class="more" aria-labelledby="levers-title">
-        <h2 id="levers-title">Selected rules, one by one</h2>
-        <p class="finding" id="levers-finding" aria-live="polite"></p>
-        <details>
-          <summary>Show the rules</summary>
-          <p>
-            Not every rule in force: the ones this data can say something about. Texts were checked
-            against the official gazettes (BOE, DOGC) on the date shown.
+      <section class="screen" id="gap" aria-labelledby="gap-title">
+        <div class="wrap head">
+          <h2 id="gap-title"></h2>
+          <p class="sub" id="gap-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="gap-how"></p>
+          </details>
+        </div>
+        <ul class="legend" id="gap-legend"></ul>
+        <div class="fill" id="gap-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="licences" aria-labelledby="licences-title">
+        <div class="wrap head">
+          <h2 id="licences-title"></h2>
+          <p class="sub" id="licences-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="licences-how"></p>
+          </details>
+        </div>
+        <ul class="legend" id="licences-legend"></ul>
+        <div class="fill" id="licences-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="register" aria-labelledby="register-title">
+        <div class="wrap head">
+          <h2 id="register-title"></h2>
+          <p class="sub" id="register-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="register-how"></p>
+          </details>
+        </div>
+        <ul class="legend" id="register-legend"></ul>
+        <div class="fill" id="register-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="hosts" aria-labelledby="hosts-title">
+        <div class="wrap head">
+          <h2 id="hosts-title"></h2>
+          <p class="sub" id="hosts-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="hosts-how"></p>
+          </details>
+        </div>
+        <ul class="legend" id="hosts-legend"></ul>
+        <div class="fill" id="hosts-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="rents" aria-labelledby="rents-title">
+        <div class="wrap head">
+          <h2 id="rents-title"></h2>
+          <p class="sub" id="rents-sub"></p>
+          <details class="how">
+            <summary>How is this made?</summary>
+            <p id="rents-how"></p>
+          </details>
+        </div>
+        <ul class="legend" id="rents-legend"></ul>
+        <div class="fill" id="rents-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="rules" aria-labelledby="rules-title">
+        <div class="wrap head">
+          <h2 id="rules-title"></h2>
+          <p class="sub" id="rules-sub"></p>
+        </div>
+        <div class="fill" id="rules-chart" role="img"></div>
+        <div class="wrap rule-detail" id="rule-detail" aria-live="polite"></div>
+      </section>
+
+      <section class="screen last" id="method" aria-labelledby="method-title">
+        <div class="wrap head">
+          <h2 id="method-title">How this was made, and what it cannot show.</h2>
+          <p class="sub">
+            Every number on this page is computed from public files by an open Python pipeline, with its
+            numerator and denominator in the published data. The data shows settings, counts and timing.
+            It does not show causes, how long guests actually stay, or whether any listing breaks a rule.
           </p>
-          <div class="chart" id="timeline-chart" role="img"></div>
-          <div class="cards" id="lever-cards"></div>
-          <h3>After the data</h3>
-          <div class="cards" id="later-developments"></div>
-        </details>
+        </div>
+        <div class="wrap rail">
+          <ol class="pipeline" id="pipeline"></ol>
+        </div>
+        <div class="wrap">
+          <details class="how wide">
+            <summary>All caveats and sources</summary>
+            <ul class="plain" id="caveats"></ul>
+            <ul class="plain" id="sources"></ul>
+          </details>
+        </div>
+        <div class="wrap endnote">
+          <p id="endnote-caveat"></p>
+          <footer id="footer-links"></footer>
+        </div>
       </section>
     </main>
-
-    <footer>
-      <details class="method">
-        <summary>Sources and caveats</summary>
-        <ul id="sources"></ul>
-        <ul id="caveats"></ul>
-      </details>
-      <p class="note" id="footer-links"></p>
-    </footer>
 
     <script type="module" src="/src/main.ts"></script>
   </body>

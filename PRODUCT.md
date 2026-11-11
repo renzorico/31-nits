@@ -29,7 +29,7 @@ A data story that publishes its own corrections and limits. Every percentage has
 ## Capabilities and Constraints
 
 - Population throughout: Airbnb listings with open dates. Listings are labelled by the minimum stay they ask (under 31 / exactly 31 / over 31 nights), never by legality.
-- Sections: minimum stays histogram, map, listing flows, city comparison, host concentration, HUT register, rents, rules as policy levers.
+- Screens (Nov 2026 redesign, see DESIGN.md): the wall at 31 nights, price by minimum stay, map, listing flows, exit gap by city, licence field, HUT register, host concentration, rents, rules timeline, method.
 - Privacy: the raw `license` column and the register's addresses never reach the site; tests scan the site data for identifying fields.
 - Thresholds, dates and laws live only in `src/config.py`; URLs and paths only in `src/sources.py`.
 - Language and visual direction beyond what the code already does were not stated as binding.
