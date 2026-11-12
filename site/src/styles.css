@@ -81,8 +81,9 @@ h2 { font-size: clamp(25px, 3vw, 38px); line-height: 1.12; letter-spacing: -.015
 h2 strong { font-weight: 800; }
 .sub { margin: 14px 0 0; color: var(--ink-2); max-width: var(--measure); }
 .sub b { color: var(--ink); font-weight: 600; }
-details.how { margin-top: 10px; font-size: 14px; color: var(--muted); max-width: var(--measure); }
-details.how summary { cursor: pointer; padding: 6px 0; min-height: 32px; font-weight: 600; font-stretch: 90%; }
+.foot { margin-top: 8px; }
+details.how { font-size: 13px; color: var(--muted); max-width: var(--measure); }
+details.how summary { cursor: pointer; padding: 6px 0; min-height: 32px; font-weight: 400; font-stretch: 90%; text-decoration: underline dotted; text-underline-offset: 3px; }
 details.how summary:hover { color: var(--ink); }
 details.how p { margin: 4px 0 8px; color: var(--ink-2); }
 .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin: 0 4px 0 2px; }
@@ -170,4 +171,11 @@ ul.plain li { margin: 4px 0; }
   .banner, details.explore, .lang, .skip-link { display: none; }
   .screen { break-inside: avoid; }
   body { font-size: 12pt; }
+}
+
+/* Body text is justified, with hyphenation in the page language (html lang is set per reader). */
+.lede, .sub, details.how p, details.how li, ol.steps li, ul.plain li, .rule-detail dd, .endnote p {
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
 }

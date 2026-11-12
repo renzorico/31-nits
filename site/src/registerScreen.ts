@@ -4,7 +4,7 @@ import * as d3 from "d3";
 
 import type { PolicyLever, Register } from "./data";
 import { registerQuarter, T } from "./i18n";
-import { chartHeight, COLOURS, dayMonthYear, formatInt, freshSvg, insetOf, isWaiting, monthYear, MOTION_MS, pct, revealOnView, setText, widthOf, withTip } from "./story";
+import { chartHeight, COLOURS, dayMonthYear, formatInt, freshSvg, insetOf, isWaiting, monthShort, monthYear, MOTION_MS, pct, revealOnView, setText, widthOf, withTip } from "./story";
 
 const DAY_MS = 86_400_000;
 
@@ -49,7 +49,12 @@ export function initRegisterScreen(register: Register, phaseOut: PolicyLever | u
     const inset = insetOf();
     const svg = freshSvg(root, W, H, T.register.aria(rows.map((r) => `${monthYear(r.snapshot)} ${pct(r.register_numbers_displayed_pct)}`).join(", ")));
     const x = d3.scaleBand<string>().domain(rows.map((r) => r.snapshot)).range([inset + 40, W - inset]).padding(0.38);
-    const y = d3.scaleLinear().domain([0, 100]).range([H - 44, 12]);
+    // "register Q4 2025" is too wide for close bars: then it goes on two lines under the month
+    const probe = svg.append("text").text(T.register.vs(registerQuarter(rows[0]?.register_quarter ?? "")));
+    const stacked = (probe.node() as SVGTextElement).getComputedTextLength() > x.step() - 8;
+    probe.remove();
+    const below = stacked ? 60 : 44;
+    const y = d3.scaleLinear().domain([0, 100]).range([H - below, 12]);
     for (const t of [25, 50, 75, 100]) {
       svg.append("line").attr("class", "gridline").attr("x1", inset + 40).attr("x2", W - inset).attr("y1", y(t)).attr("y2", y(t));
       svg.append("text").attr("x", inset).attr("y", y(t) + 4).text(pct(t, 0));
@@ -88,8 +93,14 @@ export function initRegisterScreen(register: Register, phaseOut: PolicyLever | u
       .text((r) => pct(r.register_numbers_displayed_pct, 0));
     for (const r of rows) {
       const cx = (x(r.snapshot) ?? 0) + x.bandwidth() / 2;
-      svg.append("text").attr("class", "lab-strong").attr("x", cx).attr("y", H - 24).attr("text-anchor", "middle").text(monthYear(r.snapshot));
-      svg.append("text").attr("x", cx).attr("y", H - 8).attr("text-anchor", "middle").text(T.register.vs(registerQuarter(r.register_quarter)));
+      svg.append("text").attr("class", "lab-strong").attr("x", cx).attr("y", H - below + 20).attr("text-anchor", "middle").text(monthShort(r.snapshot));
+      const vs = svg.append("text").attr("x", cx).attr("y", H - below + 36).attr("text-anchor", "middle");
+      if (stacked) {
+        vs.append("tspan").attr("x", cx).text(T.register.vsWord);
+        vs.append("tspan").attr("x", cx).attr("dy", 15).text(registerQuarter(r.register_quarter));
+      } else {
+        vs.text(T.register.vs(registerQuarter(r.register_quarter)));
+      }
     }
     withTip(bars, (r) =>
       T.register.tip(monthYear(r.snapshot), formatInt(r.displayed_numbers_found_in_register), formatInt(r.register_numbers), registerQuarter(r.register_quarter), pct(r.register_numbers_displayed_pct)),

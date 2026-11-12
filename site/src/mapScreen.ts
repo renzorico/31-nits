@@ -10,7 +10,7 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 
 import { BANDS, loadPoints, type Band, type Points } from "./data";
 import { T } from "./i18n";
-import { byId, COLOURS, formatInt, monthYear } from "./story";
+import { byId, COLOURS, formatInt, monthShort } from "./story";
 
 maplibregl.setWorkerUrl(workerUrl);
 
@@ -101,7 +101,7 @@ export async function initMapScreen(snapshots: string[], line: number): Promise<
           `<li><button type="button" data-band="${b}" aria-pressed="${!hidden.has(b)}"><i style="background:${COLOURS[b]}"></i>${T.band(b, line)} · ${formatInt(counts.get(b) ?? 0)}</button></li>`,
       ).join("") +
       `<li><span class="view-switch" role="group" aria-label="${T.map.snapshot}">${snapshots
-        .map((s) => `<button type="button" data-snapshot="${s}" aria-pressed="${s === snapshot}">${monthYear(s)}</button>`)
+        .map((s) => `<button type="button" data-snapshot="${s}" aria-pressed="${s === snapshot}">${monthShort(s)}</button>`)
         .join("")}</span></li>`;
   };
   legend.addEventListener("click", async (event) => {

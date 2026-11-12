@@ -134,6 +134,12 @@ export interface ExitGap {
   accounts: number;
   month_plus_listings: number;
   shorter_listings: number;
+  /** share of month-plus / shorter-stay listings absent from the later snapshot, % */
+  month_plus_gone_pct: number;
+  shorter_gone_pct: number;
+  /** first and last snapshot dates compared */
+  from: string;
+  to: string;
   top10_accounts_share_of_month_plus_pct: number;
   /** Barcelona minus this city; null for Barcelona itself */
   vs_barcelona: { difference_points: number; ci_low: number; ci_high: number } | null;

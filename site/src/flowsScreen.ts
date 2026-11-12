@@ -4,7 +4,7 @@
 import * as d3 from "d3";
 
 import { BANDS, CITIES, type Band, type CityRow, type TransitionTable, type Transitions } from "./data";
-import { cityName, decimal, signed, T } from "./i18n";
+import { cityName, decimal, list, signed, T } from "./i18n";
 import {
   chartHeight,
   COLOURS,
@@ -180,7 +180,7 @@ export function initFlowsScreen(transitions: Transitions, line: number): () => v
   };
 }
 
-export function initGapScreen(cities: CityRow[]): () => void {
+export function initGapScreen(cities: CityRow[], line: number): () => void {
   const rows = CITIES.map((c) => cities.find((r) => r.city === c)).filter((r): r is CityRow => r !== undefined);
   const bcn = rows.find((r) => r.city === "barcelona");
   if (!bcn) throw new Error("No Barcelona exit gap");
@@ -188,17 +188,15 @@ export function initGapScreen(cities: CityRow[]): () => void {
   // The contrast intervals (Barcelona minus each city) are the test; overlapping separate intervals never are.
   const distinguishable = others.filter((r) => r.exit_gap.vs_barcelona && (r.exit_gap.vs_barcelona.ci_low > 0 || r.exit_gap.vs_barcelona.ci_high < 0));
   const clearlyAbove = rows.filter((r) => r.exit_gap.ci_low > 0);
-  const larger = others.filter((r) => r.exit_gap.points > bcn.exit_gap.points);
+  const more = rows.filter((r) => r.exit_gap.month_plus_gone_pct > r.exit_gap.shorter_gone_pct);
+  const b = bcn.exit_gap;
 
-  setText(
-    "gap-title",
-    distinguishable.length === 0 ? T.gap.titleSame(Math.round(bcn.exit_gap.points)) : T.gap.titleDiff(distinguishable.map((r) => cityName(r.city)).join(", ")),
-  );
-  setText("gap-sub", T.gap.sub(clearlyAbove.length, larger.map((r) => cityName(r.city))));
-  setText("gap-how", T.gap.how);
+  setText("gap-title", T.gap.title(more.length, rows.length, distinguishable.length ? list(distinguishable.map((r) => cityName(r.city))) : null));
+  setText("gap-sub", T.gap.sub(monthYear(b.from), monthYear(b.to), pct(b.month_plus_gone_pct, 0), pct(b.shorter_gone_pct, 0), clearlyAbove.length, line));
+  setText("gap-how", T.gap.how(decimal(b.ci_low), decimal(b.ci_high)));
   setLegend("gap-legend", [
-    [T.gap.barcelona, COLOURS.ink],
-    [T.gap.others, COLOURS.muted],
+    [T.gap.shorter(line), COLOURS.under_31],
+    [T.gap.monthPlus(line), COLOURS.over_31],
   ]);
 
   const root = document.getElementById("gap-chart") as HTMLElement;
@@ -212,59 +210,60 @@ export function initGapScreen(cities: CityRow[]): () => void {
       root,
       W,
       H,
-      T.gap.aria(rows.map((r) => `${cityName(r.city)} ${decimal(r.exit_gap.points)} (${decimal(r.exit_gap.ci_low)} – ${decimal(r.exit_gap.ci_high)})`).join("; ")),
+      T.gap.aria(rows.map((r) => `${cityName(r.city)} ${pct(r.exit_gap.month_plus_gone_pct, 0)} / ${pct(r.exit_gap.shorter_gone_pct, 0)}`).join("; ")),
     );
-    const labelW = narrow ? 84 : 130;
-    const lo = Math.min(0, d3.min(rows, (r) => r.exit_gap.ci_low) ?? 0);
-    const hi = d3.max(rows, (r) => r.exit_gap.ci_high) ?? 40;
-    const x = d3.scaleLinear().domain([lo - 2, hi + 2]).nice().range([inset + labelW, W - inset - 10]);
-    const y = d3.scaleBand<string>().domain(rows.map((r) => r.city)).range([26, H - 30]).padding(0.3);
+    const labelW = narrow ? 76 : 120;
+    const apartW = narrow ? 40 : 96;
+    const hi = d3.max(rows, (r) => r.exit_gap.month_plus_gone_pct) ?? 50;
+    // headroom right of the largest dot for its value label
+    const x = d3.scaleLinear().domain([0, hi * (narrow ? 1.25 : 1.12)]).range([inset + labelW, W - inset - apartW]);
+    const y = d3.scaleBand<string>().domain(rows.map((r) => r.city)).range([28, H - 28]).padding(0.25);
 
-    svg.append("text").attr("x", W - inset).attr("y", 12).attr("text-anchor", "end").text(T.gap.axis);
-    for (const t of x.ticks(narrow ? 4 : 8)) {
-      svg.append("line").attr("class", t === 0 ? "axisline" : "gridline").attr("x1", x(t)).attr("x2", x(t)).attr("y1", 20).attr("y2", H - 26);
-      svg
-        .append("text")
-        .attr("x", x(t))
-        .attr("y", H - 8)
-        .attr("text-anchor", "middle")
-        .text(t === 0 ? (narrow ? "0" : T.gap.zero) : signed(t));
+    svg.append("text").attr("x", inset + labelW).attr("y", 12).text(T.gap.axis);
+    for (const t of x.ticks(narrow ? 3 : 5)) {
+      svg.append("line").attr("class", t === 0 ? "axisline" : "gridline").attr("x1", x(t)).attr("x2", x(t)).attr("y1", 22).attr("y2", H - 24);
+      svg.append("text").attr("x", x(t)).attr("y", H - 6).attr("text-anchor", "middle").text(pct(t, 0));
     }
 
     const waiting = isWaiting(KEY);
-    const zero = x(0);
     rows.forEach((r, i) => {
       const e = r.exit_gap;
       const cy = (y(r.city) ?? 0) + y.bandwidth() / 2;
       const isBcn = r.city === "barcelona";
-      const colour = isBcn ? COLOURS.ink : COLOURS.muted;
-      svg.append("text").attr("x", inset).attr("y", cy + 4).attr("class", isBcn ? "lab-strong" : "lab").text(cityName(r.city));
-      const ci = svg
+      const xs = x(e.shorter_gone_pct);
+      const xm = x(e.month_plus_gone_pct);
+      if (isBcn) {
+        svg.append("rect").attr("x", inset).attr("width", Math.max(0, W - 2 * inset)).attr("y", y(r.city) ?? 0).attr("height", y.bandwidth()).attr("fill", "#ece7dc");
+      }
+      svg.append("text").attr("x", inset + 6).attr("y", cy + 4).attr("class", isBcn ? "lab-strong" : "lab").text(cityName(r.city));
+      const bar = svg
         .append("line")
         .attr("y1", cy)
         .attr("y2", cy)
-        .attr("x1", waiting ? zero : x(e.ci_low))
-        .attr("x2", waiting ? zero : x(e.ci_high))
-        .attr("stroke", colour)
-        .attr("stroke-width", isBcn ? 4 : 3)
-        .attr("stroke-linecap", "round")
-        .attr("opacity", 0.45);
+        .attr("x1", xs)
+        .attr("x2", waiting ? xs : xm)
+        .attr("stroke", COLOURS.ink)
+        .attr("stroke-width", 2)
+        .attr("opacity", 0.35);
+      svg.append("circle").attr("cy", cy).attr("cx", xs).attr("r", isBcn ? 8 : 6.5).attr("fill", COLOURS.under_31).attr("stroke", COLOURS.page).attr("stroke-width", 2);
       const dot = svg
         .append("circle")
         .attr("cy", cy)
-        .attr("cx", waiting ? zero : x(e.points))
-        .attr("r", isBcn ? 9 : 7)
-        .attr("fill", colour)
+        .attr("cx", waiting ? xs : xm)
+        .attr("r", isBcn ? 8 : 6.5)
+        .attr("fill", COLOURS.over_31)
         .attr("stroke", COLOURS.page)
         .attr("stroke-width", 2);
-      const value = svg
+      const values = svg.append("g").attr("opacity", waiting ? 0 : 1);
+      values.append("text").attr("class", "lab hl").attr("x", xs - 12).attr("y", cy + 4).attr("text-anchor", "end").text(pct(e.shorter_gone_pct, 0));
+      values.append("text").attr("class", "lab-strong hl").attr("x", xm + 12).attr("y", cy + 4).text(pct(e.month_plus_gone_pct, 0));
+      values
         .append("text")
-        .attr("class", "lab-strong hl")
-        .attr("x", x(e.points))
-        .attr("y", cy - 14)
-        .attr("text-anchor", "middle")
-        .attr("opacity", waiting ? 0 : 1)
-        .text(signed(e.points));
+        .attr("class", isBcn ? "lab-strong" : "lab")
+        .attr("x", W - inset - 6)
+        .attr("y", cy + 4)
+        .attr("text-anchor", "end")
+        .text(narrow ? signed(Math.round(e.points)) : T.gap.apart(signed(Math.round(e.points))));
       const hit = svg
         .append("rect")
         .datum(r)
@@ -278,22 +277,22 @@ export function initGapScreen(cities: CityRow[]): () => void {
         const contrast = g.vs_barcelona ? T.gap.contrast(cityName(row.city), signed(g.vs_barcelona.difference_points), decimal(g.vs_barcelona.ci_low), decimal(g.vs_barcelona.ci_high)) : "";
         return T.gap.tip(
           cityName(row.city),
+          pct(g.month_plus_gone_pct),
+          formatInt(g.month_plus_listings),
+          pct(g.shorter_gone_pct),
+          formatInt(g.shorter_listings),
           signed(g.points),
           decimal(g.ci_low),
           decimal(g.ci_high),
-          formatInt(g.month_plus_listings),
-          formatInt(g.shorter_listings),
-          formatInt(g.accounts),
-          pct(g.top10_accounts_share_of_month_plus_pct),
           contrast,
         );
       });
       if (waiting) {
         revealOnView(`${KEY}-${r.city}`, root, () => {
           const t = d3.transition().duration(MOTION_MS * 0.8).delay(i * 90).ease(d3.easeCubicOut);
-          ci.transition(t).attr("x1", x(e.ci_low)).attr("x2", x(e.ci_high));
-          dot.transition(t).attr("cx", x(e.points));
-          value.transition().delay(MOTION_MS * 0.8 + i * 90).duration(300).attr("opacity", 1);
+          bar.transition(t).attr("x2", xm);
+          dot.transition(t).attr("cx", xm);
+          values.transition().delay(MOTION_MS * 0.8 + i * 90).duration(300).attr("opacity", 1);
         });
       }
     });

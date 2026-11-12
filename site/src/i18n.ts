@@ -47,19 +47,35 @@ export const decimal = (value: number, digits = 1): string => (LANG === "en" ? v
 export const signedPct = (value: number): string => `${value > 0 ? "+" : value < 0 ? "−" : ""}${pct(Math.abs(value))}`;
 export const signed = (value: number): string => `${value > 0 ? "+" : value < 0 ? "−" : ""}${decimal(Math.abs(value), Number.isInteger(value) ? 0 : 1)}`;
 
-const MONTHS: Record<Lang, string[]> = {
+const MONTHS_SHORT: Record<Lang, string[]> = {
   en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
   es: ["ene.", "feb.", "mar.", "abr.", "may.", "jun.", "jul.", "ago.", "sept.", "oct.", "nov.", "dic."],
   ca: ["gen.", "febr.", "març", "abr.", "maig", "juny", "jul.", "ag.", "set.", "oct.", "nov.", "des."],
 };
+const MONTHS_FULL: Record<Lang, string[]> = {
+  en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+  es: ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"],
+  ca: ["gener", "febrer", "març", "abril", "maig", "juny", "juliol", "agost", "setembre", "octubre", "novembre", "desembre"],
+};
 const parse = (iso: string): Date => new Date(`${iso.slice(0, 10)}T00:00:00Z`);
+/** "de " before a month, elided to "d'" before a vowel in Catalan (d'abril, d'octubre). */
+const ofMonth = (month: string): string => (LANG === "ca" && /^[aeiou]/.test(month) ? `d'${month}` : `de ${month}`);
+/** Prose: "Dec 2025" / "diciembre de 2025" / "desembre de 2025". */
 export const monthYear = (iso: string): string => {
   const d = parse(iso);
-  return `${MONTHS[LANG][d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  if (LANG === "en") return `${MONTHS_SHORT.en[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  return `${MONTHS_FULL[LANG][d.getUTCMonth()]} de ${d.getUTCFullYear()}`;
 };
+/** Chart labels, where space is tight: "Dec 2025" / "dic. 2025" / "des. 2025". */
+export const monthShort = (iso: string): string => {
+  const d = parse(iso);
+  return `${MONTHS_SHORT[LANG][d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+};
+/** "12 Nov 2026" / "12 de noviembre de 2026" / "12 de novembre de 2026". */
 export const dayMonthYear = (iso: string): string => {
   const d = parse(iso);
-  return `${d.getUTCDate()} ${MONTHS[LANG][d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  if (LANG === "en") return `${d.getUTCDate()} ${MONTHS_SHORT.en[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+  return `${d.getUTCDate()} ${ofMonth(MONTHS_FULL[LANG][d.getUTCMonth()] ?? "")} de ${d.getUTCFullYear()}`;
 };
 /** "2026-01-01" -> "Q1 2026" / "T1 2026" */
 export const quarterOf = (iso: string): string => {
@@ -158,15 +174,14 @@ interface Strings {
     aria: (from: string, to: string, gone: string, total: string, shortGone: string, shortTotal: string) => string;
   };
   gap: {
-    titleSame: (points: number) => string;
-    titleDiff: (cities: string) => string;
-    sub: (clear: number, larger: string[]) => string;
-    how: string;
-    barcelona: string;
-    others: string;
+    title: (more: number, total: number, distinct: string | null) => string;
+    sub: (from: string, to: string, mp: string, sh: string, clear: number, line: number) => string;
+    how: (lo: string, hi: string) => string;
+    monthPlus: (line: number) => string;
+    shorter: (line: number) => string;
     axis: string;
-    zero: string;
-    tip: (city: string, points: string, lo: string, hi: string, mp: string, sh: string, acc: string, top10: string, contrast: string) => string;
+    apart: (points: string) => string;
+    tip: (city: string, mp: string, nmp: string, sh: string, nsh: string, points: string, lo: string, hi: string, contrast: string) => string;
     contrast: (city: string, diff: string, lo: string, hi: string) => string;
     aria: (rows: string) => string;
   };
@@ -184,6 +199,7 @@ interface Strings {
     sub: (first: string, firstQ: string, last: string, lastQ: string, numbers: string, deadline: string | null, days: string | null) => string;
     how: (quarter: string, snapshot: string, found: string) => string;
     vs: (quarter: string) => string;
+    vsWord: string;
     tip: (month: string, n: string, all: string, quarter: string, p: string) => string;
     aria: (values: string) => string;
   };
@@ -271,7 +287,7 @@ const en: Strings = {
   hero: {
     title: (k) => `<em>${k} in 10</em> Barcelona Airbnb listings ask guests to stay a month or more.`,
     lede: (line, round, bcn, lo, hi, cities) =>
-      `In Catalonia a tourist stay is legally ${line} days or fewer. In ${round}, ${bcn} of Barcelona's Airbnb listings with open dates asked for a minimum of ${line} nights or more, against ${lo}–${hi} in ${cities}. What that shows about the housing rules, and what it cannot.`,
+      `In Catalonia a tourist stay is legally ${line} days or fewer. In ${round}, ${bcn} of Barcelona's Airbnb listings with open dates asked for a minimum of ${line} nights or more. In ${cities}, between ${lo} and ${hi} did. What that shows about the housing rules, and what it cannot.`,
     statListings: (r) => `Barcelona listings with open dates, ${r}`,
     statShare: (line) => `ask for ${line}+ nights`,
     statOthers: "the same share in Madrid, Valencia, Málaga, Sevilla",
@@ -324,19 +340,20 @@ const en: Strings = {
     aria: (from, to, g, t, sg, st) => `Flow diagram, Barcelona ${from} to ${to}: ${g} of ${t} month-plus listings and ${sg} of ${st} shorter-stay listings were absent from the later scrape.`,
   },
   gap: {
-    titleSame: (p) => `Is Barcelona different? Its ${p}-point gap cannot be told apart from the four other cities'.`,
-    titleDiff: (c) => `Barcelona's exit gap differs clearly from ${c}.`,
-    sub: (clear, larger) =>
-      `The exit gap is the share of month-plus listings absent from the later scrape minus the share of shorter-stay listings absent. Of the five cities, only Barcelona is under the Catalan seasonal-let rule. The gap is clearly above zero in ${clear} of 5 cities, and ${larger.length === 0 ? "no other city has" : `${list(larger)} ${larger.length === 1 ? "has" : "have"}`} a larger gap.`,
-    how: "Lines are 95% intervals from resampling whole host accounts, because one operator can withdraw many listings at once; resampling listings would understate the uncertainty. A city is called different from Barcelona only when the interval of the difference (Barcelona minus that city) excludes zero. The other cities have only two snapshots, about nine months apart.",
-    barcelona: "Barcelona",
-    others: "Other cities",
-    axis: "percentage points, month-plus minus shorter stays →",
-    zero: "0 = no gap",
-    tip: (c, p, lo, hi, mp, sh, acc, top10, contrast) =>
-      `<b>${c}: ${p} points</b>95% interval ${lo} to ${hi}<br>${mp} month-plus and ${sh} shorter-stay listings, ${acc} host accounts<br>The 10 largest accounts hold ${top10} of the month-plus listings${contrast}`,
-    contrast: (c, d, lo, hi) => `<br>Barcelona minus ${c}: ${d} (${lo} to ${hi})`,
-    aria: (rows) => `Dot chart with 95% intervals, exit gap in percentage points: ${rows}`,
+    title: (n, total, distinct) =>
+      `In ${n === total ? `all ${total}` : `${n} of ${total}`} cities, listings asking a month or more disappeared more often than shorter stays. ${distinct ? `Barcelona's difference stands apart from ${distinct}'s.` : "Barcelona does not stand out."}`,
+    sub: (from, to, mp, sh, clear, line) =>
+      `Each row takes the listings a city had with open dates in ${from} and counts how many were gone from Airbnb by ${to}. In Barcelona, ${mp} of those asking ${line} nights or more were gone, against ${sh} of the rest. The difference is clearly above zero in ${clear} of 5 cities. Only Barcelona is under the Catalan rule that extended the rent limit to seasonal lets in January 2026.`,
+    how: (lo, hi) =>
+      `“Gone” means absent from the later snapshot: withdrawn, re-listed under a new id, or missed by the scraper; the files cannot say which. Listings that first appeared after the first snapshot are not counted. The distance between the two dots has a 95% interval from resampling whole host accounts, because one operator can withdraw many listings at once (Barcelona: ${lo} to ${hi} points). A city is called different from Barcelona only when the interval of the difference between the two excludes zero. The other cities have two snapshots each, about nine months apart.`,
+    monthPlus: (line) => `Asking ${line} nights or more`,
+    shorter: (line) => `Asking under ${line} nights`,
+    axis: "share of listings gone by the later snapshot →",
+    apart: (p) => `${p} points`,
+    tip: (c, mp, nmp, sh, nsh, p, lo, hi, contrast) =>
+      `<b>${c}</b>${mp} of ${nmp} listings asking a month or more were gone<br>${sh} of ${nsh} shorter-stay listings were gone<br>Difference: ${p} points (95% interval ${lo} to ${hi})${contrast}`,
+    contrast: (c, d, lo, hi) => `<br>Barcelona minus ${c}: ${d} points (${lo} to ${hi})`,
+    aria: (rows) => `Dot chart, share of listings gone by the later snapshot, month-plus against shorter stays: ${rows}`,
   },
   licences: {
     groups: {
@@ -361,18 +378,19 @@ const en: Strings = {
     how: (q, s, found) =>
       `Each bar compares one snapshot with the nearest published register quarter (latest: ${s} against ${q}). The green part is the share of the register's licence numbers shown on at least one listing with open dates. ${found} of the numbers listings display exist in the register. A match shows the number exists; it does not show the listing is that flat. A number not shown is not an empty flat: it may let on other platforms, directly, or not at all. Owners can ask for one extension of up to five years. The council has said (June 2024 press reports) that it does not plan to grant the new licences; that is a stated policy, not a legal text.`,
     vs: (q) => `register ${q}`,
+    vsWord: "register",
     tip: (m, n, all, q, p) => `<b>${m}</b>${n} of ${all} licence numbers in the ${q} register (${p}) are shown on a listing with open dates`,
     aria: (v) => `Bar chart: share of the register's licence numbers shown on Airbnb, by snapshot: ${v}.`,
   },
   hosts: {
-    title: (o, min, hood, hp) => `${o} of Barcelona's listings belong to accounts with ${min} or more; in ${hood}, ${hp}.`,
+    title: (o, min, hood, hp) => `${o} of Barcelona's listings belong to accounts with ${min} or more listings; in ${hood}, ${hp}.`,
     sub: (others, top1) =>
-      `Each neighbourhood is coloured by the share of its listings run by an account with 5 or more. In the other cities: ${list(others)}. The largest 1% of accounts alone run ${top1} of Barcelona's listings.`,
+      `Each neighbourhood is coloured by the share of its listings run by an account with 5 or more listings. In the other cities: ${list(others)}. The largest 1% of accounts alone run ${top1} of Barcelona's listings.`,
     how: (r, min, ml) =>
       `${r} snapshot, listings with open dates. Account size is counted per snapshot. An account is not a person or a company: one firm can run several accounts, and one account can manage flats for many owners. Neighbourhoods with fewer than ${ml} listings are hatched. ${min} or more listings is a working definition of a professional host, not a legal one.`,
-    rampLabel: (min) => `Share of listings in accounts with ${min}+`,
-    tip: (d, p, n, min) => `${d}<br>${p} of ${n} listings are in accounts with ${min}+`,
-    aria: (p, min) => `Map of Barcelona's neighbourhoods coloured by the share of listings in accounts with ${min} or more; citywide ${p}.`,
+    rampLabel: (min) => `Share of listings in accounts with ${min}+ listings`,
+    tip: (d, p, n, min) => `${d}<br>${p} of ${n} listings are in accounts with ${min}+ listings`,
+    aria: (p, min) => `Map of Barcelona's neighbourhoods coloured by the share of listings in accounts with ${min} or more listings; citywide ${p}.`,
   },
   atlas: {
     title: (h, hp, line, l, lp) => `In ${h}, ${hp} of listings ask for ${line} nights or more; in ${l}, ${lp}.`,
@@ -388,7 +406,7 @@ const en: Strings = {
   rents: {
     title: (q, rent, p, fewer, q0) => `In ${q} new leases averaged ${rent} a month, and ${p} ${fewer ? "fewer" : "more"} were lodged than in ${q0}.`,
     sub: (r0, q0, peak, qp, r1, q1, n0, n1) =>
-      `The average rent of a new lease rose from ${r0} (${q0}) to a peak of ${peak} (${qp}) and was ${r1} in ${q1}. New leases lodged went from ${n0} to ${n1} a quarter. The dashed lines mark when the two rent rules began.`,
+      `The average rent of a new lease rose from ${r0} a month (${q0}) to a peak of ${peak} (${qp}) and was ${r1} a month in ${q1}. New leases lodged went from ${n0} to ${n1} a quarter. The dashed lines mark when the two rent rules began.`,
     how: (rules) =>
       `From the deposits landlords must lodge with the Catalan housing agency (Incasòl), Barcelona city, euros of each year (not adjusted for inflation). The timing is shown; the cause is not. Interest rates, wages, supply and the mix of flats rented all move the average, and a lease that is never lodged is not counted. Rule dates: ${rules}.`,
     legendRent: "Average monthly rent, new leases",
@@ -415,7 +433,7 @@ const en: Strings = {
     showsLicence: (a, b) => `The register holds ${a}–${b} records in every published quarter: no decline yet. A stable register before a deadline says nothing about what happens after it.`,
     showsRent: (b, qb, l, ql, n, qn) => `New-lease rents were rising ${b} a year just before the limit (${qb}), fell to ${l} (${ql}), and were ${n} in ${qn}.`,
     showsSeasonal: (a, ma, b, mb, c, mc, n, cities) =>
-      `Listings asking over 31 nights: ${a} (${ma}), ${b} (${mb}), ${c} (${mc}). Month-plus listings left the scrape more often than shorter ones in ${n} of 5 cities (${cities}), and Barcelona's gap cannot be told apart from any other city's.`,
+      `Listings asking over 31 nights: ${a} (${ma}), ${b} (${mb}), ${c} (${mc}). Month-plus listings left the scrape more often than shorter ones in ${n} of 5 cities (${cities}), and Barcelona's difference cannot be told apart from any other city's.`,
     showsOwners: "No direct measure. This rule acts building by building, and listing data cannot see it.",
     aria: (e) => `Timeline of rules: ${e}`,
   },
@@ -460,7 +478,7 @@ const es: Strings = {
   hero: {
     title: (k) => `<em>${k} de cada 10</em> anuncios de Airbnb en Barcelona piden quedarse un mes o más.`,
     lede: (line, round, bcn, lo, hi, cities) =>
-      `En Cataluña, una estancia turística es por ley de ${line} días o menos. En ${round}, el ${bcn} de los anuncios de Airbnb en Barcelona con fechas disponibles pedía una estancia mínima de ${line} noches o más, frente al ${lo}–${hi} en ${cities}. Qué dice esto sobre las normas de vivienda, y qué no puede decir.`,
+      `En Cataluña, una estancia turística es por ley de ${line} días o menos. En ${round}, el ${bcn} de los anuncios de Airbnb en Barcelona con fechas disponibles pedía una estancia mínima de ${line} noches o más. En ${cities}, entre el ${lo} y el ${hi}. Qué dice esto sobre las normas de vivienda, y qué no puede decir.`,
     statListings: (r) => `anuncios en Barcelona con fechas disponibles, ${r}`,
     statShare: (line) => `piden ${line} noches o más`,
     statOthers: "la misma cifra en Madrid, Valencia, Málaga y Sevilla",
@@ -513,19 +531,20 @@ const es: Strings = {
     aria: (from, to, g, t, sg, st) => `Diagrama de flujos, Barcelona ${from} a ${to}: ${g} de ${t} anuncios de un mes o más y ${sg} de ${st} de estancia más corta estaban ausentes de la captura posterior.`,
   },
   gap: {
-    titleSame: (p) => `¿Es Barcelona distinta? Su brecha de ${p} puntos no se distingue de la de las otras cuatro ciudades.`,
-    titleDiff: (c) => `La brecha de salida de Barcelona es claramente distinta de la de ${c}.`,
-    sub: (clear, larger) =>
-      `La brecha de salida es la proporción de anuncios de un mes o más ausentes de la captura posterior menos la de anuncios de estancia más corta ausentes. De las cinco ciudades, solo Barcelona está bajo la norma catalana sobre alquiler de temporada. La brecha es claramente mayor que cero en ${clear} de 5 ciudades, y ${larger.length === 0 ? "ninguna otra ciudad tiene" : `${list(larger)} ${larger.length === 1 ? "tiene" : "tienen"}`} una brecha mayor.`,
-    how: "Las líneas son intervalos del 95 % obtenidos remuestreando cuentas de anfitrión enteras, porque un solo operador puede retirar muchos anuncios a la vez; remuestrear anuncios subestimaría la incertidumbre. Una ciudad solo se considera distinta de Barcelona cuando el intervalo de la diferencia (Barcelona menos esa ciudad) excluye el cero. Las otras ciudades solo tienen dos capturas, separadas unos nueve meses.",
-    barcelona: "Barcelona",
-    others: "Otras ciudades",
-    axis: "puntos porcentuales, un mes o más menos estancias cortas →",
-    zero: "0 = sin brecha",
-    tip: (c, p, lo, hi, mp, sh, acc, top10, contrast) =>
-      `<b>${c}: ${p} puntos</b>intervalo del 95 %: ${lo} a ${hi}<br>${mp} anuncios de un mes o más y ${sh} de estancia más corta, ${acc} cuentas de anfitrión<br>Las 10 cuentas más grandes tienen el ${top10} de los anuncios de un mes o más${contrast}`,
-    contrast: (c, d, lo, hi) => `<br>Barcelona menos ${c}: ${d} (${lo} a ${hi})`,
-    aria: (rows) => `Gráfico de puntos con intervalos del 95 %, brecha de salida en puntos porcentuales: ${rows}`,
+    title: (n, total, distinct) =>
+      `En ${n === total ? `las ${total}` : `${n} de ${total}`} ciudades, los anuncios que pedían un mes o más desaparecieron más a menudo que los de estancia más corta. ${distinct ? `La diferencia de Barcelona se distingue de la de ${distinct}.` : "Barcelona no destaca."}`,
+    sub: (from, to, mp, sh, clear, line) =>
+      `Cada fila toma los anuncios con fechas disponibles que tenía una ciudad en ${from} y cuenta cuántos habían desaparecido de Airbnb en ${to}. En Barcelona desapareció el ${mp} de los que pedían ${line} noches o más, frente al ${sh} del resto. La diferencia es claramente mayor que cero en ${clear} de 5 ciudades. Solo Barcelona está bajo la norma catalana que extendió el límite del alquiler a los alquileres de temporada en enero de 2026.`,
+    how: (lo, hi) =>
+      `«Desaparecido» significa ausente de la captura posterior: retirado, vuelto a publicar con otro identificador o no captado por el rastreador; los archivos no permiten saber cuál. Los anuncios que aparecieron después de la primera captura no se cuentan. La distancia entre los dos puntos tiene un intervalo del 95 % obtenido remuestreando cuentas de anfitrión enteras, porque un solo operador puede retirar muchos anuncios a la vez (Barcelona: de ${lo} a ${hi} puntos). Una ciudad solo se considera distinta de Barcelona cuando el intervalo de la diferencia entre ambas excluye el cero. Las otras ciudades tienen dos capturas cada una, separadas unos nueve meses.`,
+    monthPlus: (line) => `Piden ${line} noches o más`,
+    shorter: (line) => `Piden menos de ${line} noches`,
+    axis: "proporción de anuncios desaparecidos en la captura posterior →",
+    apart: (p) => `${p} puntos`,
+    tip: (c, mp, nmp, sh, nsh, p, lo, hi, contrast) =>
+      `<b>${c}</b>Desapareció el ${mp} de ${nmp} anuncios de un mes o más<br>y el ${sh} de ${nsh} anuncios de estancia más corta<br>Diferencia: ${p} puntos (intervalo del 95 %: de ${lo} a ${hi})${contrast}`,
+    contrast: (c, d, lo, hi) => `<br>Barcelona menos ${c}: ${d} puntos (de ${lo} a ${hi})`,
+    aria: (rows) => `Gráfico de puntos, proporción de anuncios desaparecidos en la captura posterior, de un mes o más frente a estancias más cortas: ${rows}`,
   },
   licences: {
     groups: {
@@ -550,18 +569,19 @@ const es: Strings = {
     how: (q, s, found) =>
       `Cada barra compara una captura con el trimestre del registro publicado más cercano (la última: ${s} con el ${q}). La parte verde es la proporción de números de licencia del registro que aparecen en al menos un anuncio con fechas disponibles. El ${found} de los números que muestran los anuncios existe en el registro. Una coincidencia muestra que el número existe, no que el anuncio sea esa vivienda. Un número que no aparece no es un piso vacío: puede alquilarse en otras plataformas, directamente o no alquilarse. Los propietarios pueden pedir una única prórroga de hasta cinco años. El Ayuntamiento ha dicho (prensa de junio de 2024) que no prevé conceder las nuevas licencias; es una política anunciada, no un texto legal.`,
     vs: (q) => `registro ${q}`,
+    vsWord: "registro",
     tip: (m, n, all, q, p) => `<b>${m}</b>${n} de ${all} números de licencia del registro del ${q} (${p}) aparecen en un anuncio con fechas disponibles`,
     aria: (v) => `Gráfico de barras: proporción de números de licencia del registro que aparecen en Airbnb, por captura: ${v}.`,
   },
   hosts: {
-    title: (o, min, hood, hp) => `El ${o} de los anuncios de Barcelona pertenece a cuentas con ${min} o más; en ${hood}, el ${hp}.`,
+    title: (o, min, hood, hp) => `El ${o} de los anuncios de Barcelona pertenece a cuentas con ${min} anuncios o más; en ${hood}, el ${hp}.`,
     sub: (others, top1) =>
-      `Cada barrio está coloreado según la proporción de sus anuncios gestionados por una cuenta con 5 o más. En las otras ciudades: ${list(others)}. El 1 % de cuentas más grandes gestiona por sí solo el ${top1} de los anuncios de Barcelona.`,
+      `Cada barrio está coloreado según la proporción de sus anuncios gestionados por una cuenta con 5 anuncios o más. En las otras ciudades: ${list(others)}. El 1 % de cuentas más grandes gestiona por sí solo el ${top1} de los anuncios de Barcelona.`,
     how: (r, min, ml) =>
       `Captura de ${r}, anuncios con fechas disponibles. El tamaño de la cuenta se cuenta en cada captura. Una cuenta no es una persona ni una empresa: una empresa puede tener varias cuentas, y una cuenta puede gestionar pisos de muchos propietarios. Los barrios con menos de ${ml} anuncios aparecen rayados. ${min} anuncios o más es una definición práctica de anfitrión profesional, no una definición legal.`,
-    rampLabel: (min) => `Proporción de anuncios en cuentas con ${min}+`,
-    tip: (d, p, n, min) => `${d}<br>el ${p} de ${n} anuncios está en cuentas con ${min}+`,
-    aria: (p, min) => `Mapa de los barrios de Barcelona coloreados según la proporción de anuncios en cuentas con ${min} o más; en toda la ciudad, el ${p}.`,
+    rampLabel: (min) => `Proporción de anuncios en cuentas con ${min}+ anuncios`,
+    tip: (d, p, n, min) => `${d}<br>el ${p} de ${n} anuncios está en cuentas con ${min}+ anuncios`,
+    aria: (p, min) => `Mapa de los barrios de Barcelona coloreados según la proporción de anuncios en cuentas con ${min} anuncios o más; en toda la ciudad, el ${p}.`,
   },
   atlas: {
     title: (h, hp, line, l, lp) => `En ${h}, el ${hp} de los anuncios pide ${line} noches o más; en ${l}, el ${lp}.`,
@@ -577,7 +597,7 @@ const es: Strings = {
   rents: {
     title: (q, rent, p, fewer, q0) => `En el ${q}, los contratos nuevos tuvieron un alquiler medio de ${rent} al mes, y se registraron un ${p} ${fewer ? "menos" : "más"} que en el ${q0}.`,
     sub: (r0, q0, peak, qp, r1, q1, n0, n1) =>
-      `El alquiler medio de un contrato nuevo pasó de ${r0} (${q0}) a un máximo de ${peak} (${qp}) y fue de ${r1} en el ${q1}. Los contratos nuevos registrados pasaron de ${n0} a ${n1} por trimestre. Las líneas discontinuas marcan cuándo empezaron las dos normas sobre el alquiler.`,
+      `El alquiler medio de un contrato nuevo pasó de ${r0} al mes (${q0}) a un máximo de ${peak} (${qp}) y fue de ${r1} al mes en el ${q1}. Los contratos nuevos registrados pasaron de ${n0} a ${n1} por trimestre. Las líneas discontinuas marcan cuándo empezaron las dos normas sobre el alquiler.`,
     how: (rules) =>
       `A partir de las fianzas que los arrendadores deben depositar en el Incasòl, ciudad de Barcelona, euros de cada año (sin ajustar por inflación). Se muestra el momento, no la causa. Los tipos de interés, los salarios, la oferta y el tipo de pisos alquilados mueven la media, y un contrato cuya fianza no se deposita no se cuenta. Fechas de las normas: ${rules}.`,
     legendRent: "Alquiler medio mensual, contratos nuevos",
@@ -604,7 +624,7 @@ const es: Strings = {
     showsLicence: (a, b) => `El registro tiene entre ${a} y ${b} registros en cada trimestre publicado: todavía no hay descenso. Un registro estable antes de una fecha límite no dice nada de lo que pasará después.`,
     showsRent: (b, qb, l, ql, n, qn) => `Los alquileres de contratos nuevos subían un ${b} interanual justo antes del límite (${qb}), bajaron a ${l} (${ql}) y estaban en ${n} en el ${qn}.`,
     showsSeasonal: (a, ma, b, mb, c, mc, n, cities) =>
-      `Anuncios que piden más de 31 noches: ${a} (${ma}), ${b} (${mb}), ${c} (${mc}). Los anuncios de un mes o más salieron de la captura más a menudo que los de estancia corta en ${n} de 5 ciudades (${cities}), y la brecha de Barcelona no se distingue de la de ninguna otra ciudad.`,
+      `Anuncios que piden más de 31 noches: ${a} (${ma}), ${b} (${mb}), ${c} (${mc}). Los anuncios de un mes o más salieron de la captura más a menudo que los de estancia corta en ${n} de 5 ciudades (${cities}), y la diferencia de Barcelona no se distingue de la de ninguna otra ciudad.`,
     showsOwners: "No hay medida directa. Esta norma actúa edificio por edificio y los datos de anuncios no la ven.",
     aria: (e) => `Línea de tiempo de normas: ${e}`,
   },
@@ -641,7 +661,7 @@ const ca: Strings = {
   nightsOrMore: (n) => `${n} nits o més`,
   minimum: (t) => `mínim ${t}`,
   noPrice: "sense dades de preu",
-  askingPrice: (p) => `preu medià demanat: ${p} per nit`,
+  askingPrice: (p) => `mediana del preu demanat: ${p} per nit`,
   listingsOf: (n, p, total) => `${n} anuncis, ${p} de ${total}`,
   listingsN: (n) => `${n} anuncis`,
   byline: (a, p, d, url) => `Per <b>${a}</b> · Publicat el ${p} · Dades fins al ${d} · <a href="${url}" target="_blank" rel="noopener">Codi i correccions</a>`,
@@ -649,7 +669,7 @@ const ca: Strings = {
   hero: {
     title: (k) => `<em>${k} de cada 10</em> anuncis d'Airbnb a Barcelona demanen quedar-se un mes o més.`,
     lede: (line, round, bcn, lo, hi, cities) =>
-      `A Catalunya, una estada turística és per llei de ${line} dies o menys. Al ${round}, el ${bcn} dels anuncis d'Airbnb a Barcelona amb dates disponibles demanava una estada mínima de ${line} nits o més, davant del ${lo}–${hi} a ${cities}. Què diu això sobre les normes d'habitatge, i què no pot dir.`,
+      `A Catalunya, una estada turística és per llei de ${line} dies o menys. Al ${round}, el ${bcn} dels anuncis d'Airbnb a Barcelona amb dates disponibles demanava una estada mínima de ${line} nits o més. A ${cities}, entre el ${lo} i el ${hi}. Què diu això sobre les normes d'habitatge, i què no pot dir.`,
     statListings: (r) => `anuncis a Barcelona amb dates disponibles, ${r}`,
     statShare: (line) => `demanen ${line} nits o més`,
     statOthers: "la mateixa xifra a Madrid, València, Màlaga i Sevilla",
@@ -671,12 +691,12 @@ const ca: Strings = {
   price: {
     title: (line, one, after) => `Un anunci d'una nit demana ${one} per nit; un de ${line + 1} nits, ${after}.`,
     sub: (ratio, between, lo, hi) =>
-      `Mateixa ciutat, mateixa plataforma: ${ratio} vegades més. Cada barra és una estada mínima, a l'altura del preu medià per nit que demanen els seus anuncis. Només el ${between} dels anuncis demana un mínim d'entre ${lo} i ${hi} nits.`,
+      `Mateixa ciutat, mateixa plataforma: ${ratio} vegades més. Cada barra és una estada mínima, a l'altura de la mediana del preu per nit que demanen els seus anuncis. Només el ${between} dels anuncis demana un mínim d'entre ${lo} i ${hi} nits.`,
     how: (snapshot, line, min) =>
       `Barcelona, captura del ${snapshot}. Són preus demanats per nit, sense taxes ni descomptes setmanals o mensuals: no són el que van pagar els hostes, i un mes al preu de ${line + 1} nits no és un lloguer mensual. Només es mostren les estades mínimes que demanen almenys ${min} anuncis.`,
     label: (t, p) => `${t}: ${p}`,
-    tip: (p, n) => `preu medià demanat: ${p} per nit<br>${n} anuncis`,
-    aria: (one, line, after) => `Gràfic de piruletes: preu medià demanat per nit segons l'estada mínima a Barcelona. 1 nit: ${one}; ${line + 1} nits: ${after}.`,
+    tip: (p, n) => `mediana del preu demanat: ${p} per nit<br>${n} anuncis`,
+    aria: (one, line, after) => `Gràfic de piruletes: mediana del preu demanat per nit segons l'estada mínima a Barcelona. 1 nit: ${one}; ${line + 1} nits: ${after}.`,
   },
   map: {
     title: (h, hp, line, l, lp) => `A ${h}, el ${hp} dels anuncis demana ${line} nits o més; a ${l}, el ${lp}.`,
@@ -702,19 +722,20 @@ const ca: Strings = {
     aria: (from, to, g, t, sg, st) => `Diagrama de fluxos, Barcelona del ${from} al ${to}: ${g} de ${t} anuncis d'un mes o més i ${sg} de ${st} d'estada més curta eren absents de la captura posterior.`,
   },
   gap: {
-    titleSame: (p) => `Barcelona és diferent? La seva bretxa de ${p} punts no es distingeix de la de les altres quatre ciutats.`,
-    titleDiff: (c) => `La bretxa de sortida de Barcelona és clarament diferent de la de ${c}.`,
-    sub: (clear, larger) =>
-      `La bretxa de sortida és la proporció d'anuncis d'un mes o més absents de la captura posterior menys la d'anuncis d'estada més curta absents. De les cinc ciutats, només Barcelona està sota la norma catalana sobre lloguer de temporada. La bretxa és clarament més gran que zero en ${clear} de 5 ciutats, i ${larger.length === 0 ? "cap altra ciutat no té" : `${list(larger)} ${larger.length === 1 ? "té" : "tenen"}`} una bretxa més gran.`,
-    how: "Les línies són intervals del 95 % obtinguts remostrejant comptes d'amfitrió senceres, perquè un sol operador pot retirar molts anuncis alhora; remostrejar anuncis en subestimaria la incertesa. Una ciutat només es considera diferent de Barcelona quan l'interval de la diferència (Barcelona menys aquella ciutat) exclou el zero. Les altres ciutats només tenen dues captures, separades uns nou mesos.",
-    barcelona: "Barcelona",
-    others: "Altres ciutats",
-    axis: "punts percentuals, un mes o més menys estades curtes →",
-    zero: "0 = sense bretxa",
-    tip: (c, p, lo, hi, mp, sh, acc, top10, contrast) =>
-      `<b>${c}: ${p} punts</b>interval del 95 %: ${lo} a ${hi}<br>${mp} anuncis d'un mes o més i ${sh} d'estada més curta, ${acc} comptes d'amfitrió<br>Els 10 comptes més grans tenen el ${top10} dels anuncis d'un mes o més${contrast}`,
-    contrast: (c, d, lo, hi) => `<br>Barcelona menys ${c}: ${d} (${lo} a ${hi})`,
-    aria: (rows) => `Gràfic de punts amb intervals del 95 %, bretxa de sortida en punts percentuals: ${rows}`,
+    title: (n, total, distinct) =>
+      `A ${n === total ? `les ${total}` : `${n} de ${total}`} ciutats, els anuncis que demanaven un mes o més van desaparèixer més sovint que els d'estada més curta. ${distinct ? `La diferència de Barcelona es distingeix de la de ${distinct}.` : "Barcelona no destaca."}`,
+    sub: (from, to, mp, sh, clear, line) =>
+      `Cada fila pren els anuncis amb dates disponibles que tenia una ciutat el ${from} i compta quants havien desaparegut d'Airbnb el ${to}. A Barcelona va desaparèixer el ${mp} dels que demanaven ${line} nits o més, davant del ${sh} de la resta. La diferència és clarament més gran que zero en ${clear} de 5 ciutats. Només Barcelona està sota la norma catalana que va estendre el límit del lloguer als lloguers de temporada el gener de 2026.`,
+    how: (lo, hi) =>
+      `«Desaparegut» vol dir absent de la captura posterior: retirat, tornat a publicar amb un altre identificador o no captat pel rastrejador; els fitxers no permeten saber quin és el cas. Els anuncis que van aparèixer després de la primera captura no es compten. La distància entre els dos punts té un interval del 95 % obtingut remostrejant comptes d'amfitrió sencers, perquè un sol operador pot retirar molts anuncis alhora (Barcelona: de ${lo} a ${hi} punts). Una ciutat només es considera diferent de Barcelona quan l'interval de la diferència entre totes dues exclou el zero. Les altres ciutats tenen dues captures cadascuna, separades uns nou mesos.`,
+    monthPlus: (line) => `Demanen ${line} nits o més`,
+    shorter: (line) => `Demanen menys de ${line} nits`,
+    axis: "proporció d'anuncis desapareguts a la captura posterior →",
+    apart: (p) => `${p} punts`,
+    tip: (c, mp, nmp, sh, nsh, p, lo, hi, contrast) =>
+      `<b>${c}</b>Va desaparèixer el ${mp} de ${nmp} anuncis d'un mes o més<br>i el ${sh} de ${nsh} anuncis d'estada més curta<br>Diferència: ${p} punts (interval del 95 %: de ${lo} a ${hi})${contrast}`,
+    contrast: (c, d, lo, hi) => `<br>Barcelona menys ${c}: ${d} punts (de ${lo} a ${hi})`,
+    aria: (rows) => `Gràfic de punts, proporció d'anuncis desapareguts a la captura posterior, d'un mes o més davant d'estades més curtes: ${rows}`,
   },
   licences: {
     groups: {
@@ -739,18 +760,19 @@ const ca: Strings = {
     how: (q, s, found) =>
       `Cada barra compara una captura amb el trimestre del registre publicat més proper (la darrera: ${s} amb el ${q}). La part verda és la proporció de números de llicència del registre que apareixen en almenys un anunci amb dates disponibles. El ${found} dels números que mostren els anuncis existeix al registre. Una coincidència mostra que el número existeix, no que l'anunci sigui aquell habitatge. Un número que no apareix no és un pis buit: es pot llogar en altres plataformes, directament o no llogar-se. Els propietaris poden demanar una única pròrroga de fins a cinc anys. L'Ajuntament ha dit (premsa del juny del 2024) que no preveu concedir les noves llicències; és una política anunciada, no un text legal.`,
     vs: (q) => `registre ${q}`,
+    vsWord: "registre",
     tip: (m, n, all, q, p) => `<b>${m}</b>${n} de ${all} números de llicència del registre del ${q} (${p}) apareixen en un anunci amb dates disponibles`,
     aria: (v) => `Gràfic de barres: proporció de números de llicència del registre que apareixen a Airbnb, per captura: ${v}.`,
   },
   hosts: {
-    title: (o, min, hood, hp) => `El ${o} dels anuncis de Barcelona pertany a comptes amb ${min} o més; a ${hood}, el ${hp}.`,
+    title: (o, min, hood, hp) => `El ${o} dels anuncis de Barcelona pertany a comptes amb ${min} anuncis o més; a ${hood}, el ${hp}.`,
     sub: (others, top1) =>
-      `Cada barri està acolorit segons la proporció dels seus anuncis gestionats per un compte amb 5 o més. A les altres ciutats: ${list(others)}. L'1 % de comptes més grans gestiona tot sol el ${top1} dels anuncis de Barcelona.`,
+      `Cada barri està acolorit segons la proporció dels seus anuncis gestionats per un compte amb 5 anuncis o més. A les altres ciutats: ${list(others)}. L'1 % de comptes més grans gestiona tot sol el ${top1} dels anuncis de Barcelona.`,
     how: (r, min, ml) =>
       `Captura del ${r}, anuncis amb dates disponibles. La mida del compte es compta a cada captura. Un compte no és una persona ni una empresa: una empresa pot tenir diversos comptes, i un compte pot gestionar pisos de molts propietaris. Els barris amb menys de ${ml} anuncis apareixen ratllats. ${min} anuncis o més és una definició pràctica d'amfitrió professional, no una definició legal.`,
-    rampLabel: (min) => `Proporció d'anuncis en comptes amb ${min}+`,
-    tip: (d, p, n, min) => `${d}<br>el ${p} de ${n} anuncis és en comptes amb ${min}+`,
-    aria: (p, min) => `Mapa dels barris de Barcelona acolorits segons la proporció d'anuncis en comptes amb ${min} o més; a tota la ciutat, el ${p}.`,
+    rampLabel: (min) => `Proporció d'anuncis en comptes amb ${min}+ anuncis`,
+    tip: (d, p, n, min) => `${d}<br>el ${p} de ${n} anuncis és en comptes amb ${min}+ anuncis`,
+    aria: (p, min) => `Mapa dels barris de Barcelona acolorits segons la proporció d'anuncis en comptes amb ${min} anuncis o més; a tota la ciutat, el ${p}.`,
   },
   atlas: {
     title: (h, hp, line, l, lp) => `A ${h}, el ${hp} dels anuncis demana ${line} nits o més; a ${l}, el ${lp}.`,
@@ -766,7 +788,7 @@ const ca: Strings = {
   rents: {
     title: (q, rent, p, fewer, q0) => `El ${q}, els contractes nous van tenir un lloguer mitjà de ${rent} al mes, i se'n van registrar un ${p} ${fewer ? "menys" : "més"} que el ${q0}.`,
     sub: (r0, q0, peak, qp, r1, q1, n0, n1) =>
-      `El lloguer mitjà d'un contracte nou va passar de ${r0} (${q0}) a un màxim de ${peak} (${qp}) i va ser de ${r1} el ${q1}. Els contractes nous registrats van passar de ${n0} a ${n1} per trimestre. Les línies discontínues marquen quan van començar les dues normes sobre el lloguer.`,
+      `El lloguer mitjà d'un contracte nou va passar de ${r0} al mes (${q0}) a un màxim de ${peak} (${qp}) i va ser de ${r1} al mes el ${q1}. Els contractes nous registrats van passar de ${n0} a ${n1} per trimestre. Les línies discontínues marquen quan van començar les dues normes sobre el lloguer.`,
     how: (rules) =>
       `A partir de les fiances que els arrendadors han de dipositar a l'Incasòl, ciutat de Barcelona, euros de cada any (sense ajustar per inflació). Es mostra el moment, no la causa. Els tipus d'interès, els salaris, l'oferta i el tipus de pisos llogats mouen la mitjana, i un contracte la fiança del qual no es diposita no es compta. Dates de les normes: ${rules}.`,
     legendRent: "Lloguer mitjà mensual, contractes nous",
@@ -793,7 +815,7 @@ const ca: Strings = {
     showsLicence: (a, b) => `El registre té entre ${a} i ${b} registres a cada trimestre publicat: encara no hi ha descens. Un registre estable abans d'una data límit no diu res del que passarà després.`,
     showsRent: (b, qb, l, ql, n, qn) => `Els lloguers dels contractes nous pujaven un ${b} interanual just abans del límit (${qb}), van baixar a ${l} (${ql}) i eren a ${n} el ${qn}.`,
     showsSeasonal: (a, ma, b, mb, c, mc, n, cities) =>
-      `Anuncis que demanen més de 31 nits: ${a} (${ma}), ${b} (${mb}), ${c} (${mc}). Els anuncis d'un mes o més van sortir de la captura més sovint que els d'estada curta en ${n} de 5 ciutats (${cities}), i la bretxa de Barcelona no es distingeix de la de cap altra ciutat.`,
+      `Anuncis que demanen més de 31 nits: ${a} (${ma}), ${b} (${mb}), ${c} (${mc}). Els anuncis d'un mes o més van sortir de la captura més sovint que els d'estada curta en ${n} de 5 ciutats (${cities}), i la diferència de Barcelona no es distingeix de la de cap altra ciutat.`,
     showsOwners: "No hi ha cap mesura directa. Aquesta norma actua edifici per edifici i les dades d'anuncis no la veuen.",
     aria: (e) => `Línia de temps de normes: ${e}`,
   },

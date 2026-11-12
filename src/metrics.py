@@ -189,6 +189,16 @@ def exit_gap_cohort(earlier: pd.DataFrame, later: pd.DataFrame) -> pd.DataFrame:
     return accounts.astype(int)
 
 
+def exit_shares(accounts: pd.DataFrame) -> dict:
+    """Share of month-plus and of shorter-stay listings absent from the later
+    snapshot, in percent: the two terms whose difference is the exit gap."""
+    totals = accounts[["month_n", "month_gone", "short_n", "short_gone"]].sum()
+    return {
+        "month_plus_gone_pct": round(100 * totals["month_gone"] / totals["month_n"], 1),
+        "shorter_gone_pct": round(100 * totals["short_gone"] / totals["short_n"], 1),
+    }
+
+
 def _gap(totals: np.ndarray) -> float:
     month_n, month_gone, short_n, short_gone = totals
     return 100 * (month_gone / month_n - short_gone / short_n)

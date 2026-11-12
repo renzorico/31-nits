@@ -2,7 +2,7 @@
 // reveal-once animations. Text formats live in i18n.ts.
 import * as d3 from "d3";
 
-export { dayMonthYear, euro, formatInt, monthYear, pct } from "./i18n";
+export { dayMonthYear, euro, formatInt, monthShort, monthYear, pct } from "./i18n";
 
 export const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 export const MOTION_MS = 1000;

@@ -306,6 +306,9 @@ def exit_gap_estimates(snapshots: dict) -> dict:
             "accounts": int(len(accounts)),
             "month_plus_listings": int(accounts["month_n"].sum()),
             "shorter_listings": int(accounts["short_n"].sum()),
+            **metrics.exit_shares(accounts),
+            "from": dates[0],
+            "to": dates[-1],
             "top10_accounts_share_of_month_plus_pct": metrics.top_account_share(accounts),
             "vs_barcelona": None,
         }

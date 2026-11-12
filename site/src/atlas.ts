@@ -6,7 +6,7 @@ import type { Feature, FeatureCollection, Geometry } from "geojson";
 
 import type { CityRow, NeighbourhoodRow } from "./data";
 import { cityName, T } from "./i18n";
-import { byId, formatInt, freshSvg, chartHeight, isNarrow, pct, setHtml, setText, widthOf, withTip } from "./story";
+import { byId, formatInt, freshSvg, chartHeight, isNarrow, monthYear, pct, setHtml, setText, widthOf, withTip } from "./story";
 
 export const MIN_LISTINGS = 50; // below this a neighbourhood share is not shown
 const LATEST_ROUND = "Sep 2026";
@@ -165,7 +165,7 @@ export function initHostsMap(geo: Hoods, rows: NeighbourhoodRow[], cities: CityR
     .sort((a, b) => b.v - a.v);
   setText("hosts-title", T.hosts.title(pct(overall, 0), professionalMin, top?.neighbourhood ?? "", pct(top?.share_professional ?? 0, 0)));
   setText("hosts-sub", T.hosts.sub(others.map((o) => `${o.name} ${pct(o.v, 0)}`), pct(bcn?.top_host_share.top_1pct ?? 0, 0)));
-  setText("hosts-how", T.hosts.how(LATEST_ROUND, professionalMin, MIN_LISTINGS));
+  setText("hosts-how", T.hosts.how(bcn ? monthYear(bcn.scrape_dates[LATEST_ROUND] ?? "") : LATEST_ROUND, professionalMin, MIN_LISTINGS));
   return drawChoropleth("hosts-chart", "hosts-ramp", geo, rows, {
     key: "professional",
     value: (r) => r.share_professional,
