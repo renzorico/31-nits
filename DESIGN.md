@@ -21,6 +21,7 @@ byline and date, normal scroll, every claim placed where readers live.
   ramp per map measure (orange for month-plus share, violet for host
   size). Neighbourhoods with fewer than 50 listings are hatched, never
   coloured. The 31-night line is ink.
+- **Body text justified** with hyphenation; "How is this made?" sits under each chart, small and muted.
 - **Values on tap.** Every tooltip opens on hover and on tap (`withTip`).
 - **Lazy heavy parts.** MapLibre and the dot points load only when the
   reader opens the explorer.
@@ -37,7 +38,7 @@ byline and date, normal scroll, every claim placed where readers live.
 | Price | lollipop of median asking price by minimum stay | `price.ts` |
 | Hosts | neighbourhood choropleth of listings in 5+ accounts | `atlas.ts` |
 | Flows | flow diagram, only "vanished" and "switched" in colour | `flowsScreen.ts` |
-| Exit gap | dot + host-account interval per city | `flowsScreen.ts` |
+| Exits by city | dumbbell: share gone, shorter stays vs month-plus; interval in the tooltip | `flowsScreen.ts` |
 | Licence field | 100% bars per quarter | `licences.ts` |
 | Register | share of licence numbers shown on Airbnb, per snapshot | `registerScreen.ts` |
 | Rents | rent line over new-lease bars, rule dates dashed | `rentsScreen.ts` |
