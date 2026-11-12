@@ -21,7 +21,28 @@ REQUIRED_KEYS = {
 
 def test_every_lever_has_the_full_record():
     for name, lever in cfg.POLICY_LEVERS.items():
-        assert set(lever) == REQUIRED_KEYS, name
+        assert set(lever) == REQUIRED_KEYS | {"i18n"}, name
+
+
+TRANSLATED_FIELDS = {"title", "timeline_label", "jurisdiction", "rule", "exceptions", "status", "notes", "data_limits"}
+
+
+def test_every_lever_is_translated_to_spanish_and_catalan():
+    for name, lever in cfg.POLICY_LEVERS.items():
+        assert set(lever["i18n"]) == {"es", "ca"}, name
+        for lang, texts in lever["i18n"].items():
+            assert set(texts) == TRANSLATED_FIELDS, (name, lang)
+            assert len(texts["exceptions"]) == len(lever["exceptions"]), (name, lang)
+            # an empty English field stays empty, a filled one is filled
+            for field in TRANSLATED_FIELDS - {"exceptions"}:
+                assert bool(texts[field]) == bool(lever[field]), (name, lang, field)
+
+
+def test_later_developments_are_translated():
+    for later in cfg.POST_OBSERVATION_DEVELOPMENTS:
+        assert set(later["i18n"]) == {"es", "ca"}, later["date"]
+        for lang, texts in later["i18n"].items():
+            assert {"title", "summary", "note"} <= set(texts), (later["date"], lang)
 
 
 def test_lever_dates_and_cities_are_valid():

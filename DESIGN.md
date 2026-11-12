@@ -1,48 +1,45 @@
 # Design System: The 31-Night Line
 
-A dark scroll story: one finding per screen, each screen the same stack
-(title sentence, two-line explanation, closed "How is this made?", centred
-legend, chart edge to edge). Built on the `data-story-design` tokens, copied
-unchanged at the top of `site/src/styles.css`; project additions follow them.
+A light, map-led atlas of Barcelona's short-term rentals (chosen after the
+UX audit of 2026-11-12: the earlier dark scroll story read as a tech
+showcase). Civic data journalism register: warm paper, editorial type,
+byline and date, normal scroll, every claim placed where readers live.
 
 ## Rules
 
-- **Titles are findings.** Every screen title is a full sentence with a
-  number, computed from the exported data in the screen's module.
-- **One colour per entity, everywhere.** Minimum stay: under 31 `#3987e5`
-  (blue), exactly 31 `#c98500` (amber), over 31 `#d95926` (orange), on the
-  wall, the price dots, the map and the flow diagram. Tourist-flat licences
-  are green `#199e70` on both the licence-field bars and the register waffle.
-  Barcelona is `--ink` white against muted grey cities on the gap and host
-  charts. "Absent from the scrape" is pink `#d55181`, never the red status
-  colour.
-- **Text never wears a series colour.** Labels are `--ink`, `--ink-2` or
-  `--muted`; labels on fills are white with a dark halo. The halo class for
-  text on the page background is `hl` (`halo` is the tokens' pulse animation).
-- **Screen mode** (min 900x640): each screen is `100svh - 44px`, scroll snaps
-  and one wheel gesture moves one screen (`story.ts`). Below that, normal flow
-  with fixed chart heights.
-- **Reveal once.** Charts animate in when 30% visible and never replay on
-  redraw; `prefers-reduced-motion` skips all of it.
-- **Neutral.** No red/green good-bad encoding, no verdicts in titles; every
-  screen states what the data cannot show in its explanation or its "How".
+- **Titles are findings.** Every screen title is a sentence with a number,
+  computed from the exported data; plain words, no "scrape" or "point
+  estimate" in titles (those stay in "How is this made?").
+- **Three languages.** All reader text lives in `site/src/i18n.ts` (typed:
+  a missing key fails `tsc`); rule texts and caveats in `src/config.py` /
+  the export, with ES and CA next to EN and a test for parity. Numbers and
+  dates are formatted per locale (`41,7 %`, `10.623`, `set. 2026`).
+- **Type.** Archivo (variable width): 118% wide bold for h1, 110% for h2,
+  normal for text, 85% narrow for chart and map labels. Tabular numerals.
+- **Colour follows the entity.** Under 31 `#2f6fb3`, exactly 31 `#b97a00`,
+  over 31 `#c8471b`; tourist-flat licence green `#1b7a57`. One sequential
+  ramp per map measure (orange for month-plus share, violet for host
+  size). Neighbourhoods with fewer than 50 listings are hatched, never
+  coloured. The 31-night line is ink.
+- **Values on tap.** Every tooltip opens on hover and on tap (`withTip`).
+- **Lazy heavy parts.** MapLibre and the dot points load only when the
+  reader opens the explorer.
+- **Neutral.** No red/green verdicts; each screen states what the data
+  cannot show.
 
 ## Screens (in order)
 
 | Screen | Chart | Module |
 |---|---|---|
-| Hero | headline number + 4 stats | `main.ts` |
+| Hero | headline, byline, lede | `main.ts` |
 | The wall at 31 | histogram + 4 small multiples, same y scale | `wall.ts` |
-| Price | log-log dot chart, area = listings | `price.ts` |
-| Map | MapLibre dark, glow dots, band toggles, quarter switch | `mapScreen.ts` |
-| Flows | two-column flow diagram Dec 2025 to Sep 2026 | `flowsScreen.ts` |
+| Atlas | neighbourhood choropleth of month-plus share + dot explorer | `atlas.ts`, `mapScreen.ts` |
+| Price | lollipop of median asking price by minimum stay | `price.ts` |
+| Hosts | neighbourhood choropleth of listings in 5+ accounts | `atlas.ts` |
+| Flows | flow diagram, only "vanished" and "switched" in colour | `flowsScreen.ts` |
 | Exit gap | dot + host-account interval per city | `flowsScreen.ts` |
 | Licence field | 100% bars per quarter | `licences.ts` |
-| Register | canvas unit chart, one square per licence number | `registerScreen.ts` |
-| Hosts | concentration curves, five cities | `hosts.ts` |
+| Register | share of licence numbers shown on Airbnb, per snapshot | `registerScreen.ts` |
 | Rents | rent line over new-lease bars, rule dates dashed | `rentsScreen.ts` |
-| Rules | selectable timeline + what it says / shows / cannot show | `rules.ts` |
-| Method | six-step rail, caveats, sources | `main.ts` |
-
-Type is the system stack only, tabular numerals everywhere. No tables, tabs
-or cards; exact values live in tooltips and each chart's `aria-label`.
+| Rules | selectable timeline + says / shows / cannot show | `rules.ts` |
+| Method | numbered list, caveats, sources | `main.ts` |

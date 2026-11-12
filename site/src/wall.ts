@@ -1,27 +1,27 @@
-// Screen: the wall at 31 nights. Barcelona's minimum-stay histogram, large,
-// over four small multiples of the other cities on the SAME vertical scale,
-// so the absence of a wall elsewhere is visible, not asserted.
+// The wall at 31 nights: Barcelona's minimum-stay histogram, large, over four
+// small multiples of the other cities on the SAME vertical scale, so the
+// absence of a wall elsewhere is visible, not asserted.
 import * as d3 from "d3";
 
-import { CITIES, CITY_LABELS, type Band, type City, type NightsRow } from "./data";
+import { CITIES, type Band, type City, type NightsRow } from "./data";
+import { cityName, T } from "./i18n";
 import {
-  BAND_LABEL,
+  chartHeight,
   COLOURS,
+  euro,
   formatInt,
   freshSvg,
-  heightOf,
-  hideTip,
   insetOf,
+  isNarrow,
   isWaiting,
   MOTION_MS,
   pct,
   revealOnView,
-  setHtml,
   setLegend,
   setText,
   share,
-  showTip,
   widthOf,
+  withTip,
 } from "./story";
 
 export const NIGHTS_CAP = 120; // the export groups longer minimum stays into one "120+" bar
@@ -31,23 +31,16 @@ const KEY = "wall";
 const WALL_MAX = 45;
 const FOLDED = WALL_MAX + 1;
 
-function fold(rows: CityHistogram["rows"]): CityHistogram["rows"] {
-  const kept = rows.filter((r) => r.nights <= WALL_MAX);
-  const rest = rows.filter((r) => r.nights > WALL_MAX);
-  if (!rest.length) return kept;
-  return [...kept, { nights: FOLDED, listings: d3.sum(rest, (r) => r.listings), share: d3.sum(rest, (r) => r.share), median_price: null }];
-}
-const nightsLabel = (n: number): string => (n === FOLDED ? `${FOLDED} or more nights` : `${n} night${n === 1 ? "" : "s"}`);
-
 export function bandOf(nights: number, line: number): Band {
   return nights < line ? "under_31" : nights === line ? "exactly_31" : "over_31";
 }
 
+type Row = { nights: number; listings: number; share: number; median_price: number | null };
 export interface CityHistogram {
   city: City;
   snapshot: string;
   total: number;
-  rows: { nights: number; listings: number; share: number; median_price: number | null }[];
+  rows: Row[];
 }
 
 export function latestHistograms(rows: NightsRow[]): CityHistogram[] {
@@ -65,6 +58,14 @@ export function latestHistograms(rows: NightsRow[]): CityHistogram[] {
   });
 }
 
+function fold(rows: Row[]): Row[] {
+  const kept = rows.filter((r) => r.nights <= WALL_MAX);
+  const rest = rows.filter((r) => r.nights > WALL_MAX);
+  if (!rest.length) return kept;
+  return [...kept, { nights: FOLDED, listings: d3.sum(rest, (r) => r.listings), share: d3.sum(rest, (r) => r.share), median_price: null }];
+}
+const nightsLabel = (n: number): string => (n === FOLDED ? T.nightsOrMore(FOLDED) : T.nights(n));
+
 export function initWall(rows: NightsRow[], line: number): () => void {
   const hists = latestHistograms(rows);
   const bcn = hists.find((h) => h.city === "barcelona");
@@ -73,174 +74,131 @@ export function initWall(rows: NightsRow[], line: number): () => void {
   const one = at(1);
   const nearLine = bcn.rows.filter((r) => r.nights === line || r.nights === line + 1);
   const nearLineShare = share(d3.sum(nearLine, (r) => r.listings), bcn.total);
+  const plusShare = (h: CityHistogram) => share(d3.sum(h.rows.filter((r) => r.nights >= line), (r) => r.listings), h.total);
 
-  setText("wall-title", `Barcelona's listings split in two: one night (${pct(one?.share ?? 0, 0)}) or ${line}–${line + 1} nights (${pct(nearLineShare, 0)}).`);
-  setHtml(
-    "wall-sub",
-    `Each bar is the share of a city's Airbnb listings with open dates that ask for that minimum stay. In Catalonia a tourist stay is ${line} days or fewer, ` +
-      `and ${formatInt(at(line)?.listings ?? 0)} Barcelona listings ask exactly ${line} nights while ${formatInt(at(line + 1)?.listings ?? 0)} ask ${line + 1}. ` +
-      "The four other cities, drawn on the same scale, have no such wall.",
-  );
-  setText(
-    "wall-how",
-    `Latest snapshot per city (Barcelona ${bcn.snapshot}). A minimum stay is a setting the host chooses: it is not how long guests stay, and not a legal finding. ` +
-      `Whether a ${line}-night booking counts as "${line} days or fewer" is ambiguous, so exactly ${line} has its own colour. ` +
-      `Minimum stays of ${FOLDED} nights or more are grouped in the last bar. Outside Catalonia ${line} nights has no legal meaning and is only a common yardstick.`,
-  );
-  setLegend("wall-legend", [
-    [BAND_LABEL.under_31, COLOURS.under_31],
-    [`Exactly ${line}`, COLOURS.exactly_31],
-    [`Over ${line}`, COLOURS.over_31],
-  ]);
+  setText("wall-title", T.wall.title(pct(one?.share ?? 0, 0), line, pct(nearLineShare, 0)));
+  setText("wall-sub", T.wall.sub(line, formatInt(at(line)?.listings ?? 0), formatInt(at(line + 1)?.listings ?? 0)));
+  setText("wall-how", T.wall.how(bcn.snapshot, line, FOLDED));
+  setLegend("wall-legend", (["under_31", "exactly_31", "over_31"] as Band[]).map((b) => [T.band(b, line), COLOURS[b]]));
 
   const root = document.getElementById("wall-chart") as HTMLElement;
   const shown = hists.map((h) => ({ ...h, rows: fold(h.rows) }));
   const yMax = d3.max(shown, (h) => d3.max(h.rows, (r) => r.share)) ?? 50;
+  const others = shown.filter((h) => h.city !== "barcelona");
+  const big = shown.find((h) => h.city === "barcelona") ?? bcn;
 
   return () => {
     const W = widthOf(root);
-    const H = heightOf(root, 560);
+    const narrow = isNarrow();
+    const H = chartHeight(W, 520, 640, narrow ? 1.5 : 0.48);
     const inset = insetOf();
-    const narrow = W < 640;
     const svg = freshSvg(
       root,
       W,
       H,
-      `Bar charts of minimum stays. Barcelona: ${pct(one?.share ?? 0)} ask 1 night and ${pct(nearLineShare)} ask ${line} or ${line + 1}. ` +
-        hists
-          .filter((h) => h.city !== "barcelona")
-          .map((h) => `${CITY_LABELS[h.city]}: ${pct(share(d3.sum(h.rows.filter((r) => r.nights >= line), (r) => r.listings), h.total))} ask ${line} or more`)
-          .join("; "),
+      T.wall.aria(pct(one?.share ?? 0), pct(nearLineShare), line, others.map((h) => T.wall.otherAria(cityName(h.city), pct(plusShare(h)), line)).join("; ")),
     );
 
-    const others = shown.filter((h) => h.city !== "barcelona");
-    const big = shown.find((h) => h.city === "barcelona") ?? bcn;
-    const yAxisW = 34;
     const cols = narrow ? 2 : 4;
     const rowsOfSmall = Math.ceil(others.length / cols);
-    const gap = 28;
-    const bigH = Math.max(180, (H - gap) * (narrow ? 0.5 : 0.64));
+    const gap = 32;
+    const yAxisW = 38;
+    const bigH = Math.max(200, (H - gap) * (narrow ? 0.5 : 0.62));
     const smallH = (H - bigH - gap) / rowsOfSmall;
-    const right = inset;
-
-    const panels: { h: CityHistogram; x0: number; y0: number; w: number; h0: number; big: boolean }[] = [
-      { h: big, x0: inset + yAxisW, y0: 0, w: W - inset - right - yAxisW, h0: bigH, big: true },
+    const panels = [
+      { h: big, x0: inset + yAxisW, y0: 0, w: W - 2 * inset - yAxisW, h0: bigH, big: true },
       ...others.map((h, i) => {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        const w = (W - inset - right - (cols - 1) * 20) / cols;
-        return { h, x0: inset + col * (w + 20), y0: bigH + gap + row * smallH, w, h0: smallH, big: false };
+        const w = (W - 2 * inset - (cols - 1) * 24) / cols;
+        return { h, x0: inset + (i % cols) * (w + 24), y0: bigH + gap + Math.floor(i / cols) * smallH, w, h0: smallH, big: false };
       }),
     ];
-
     const waiting = isWaiting(KEY);
 
     for (const p of panels) {
-      const top = p.big ? 34 : 22;
-      const bottom = p.big ? 22 : 16;
+      const top = p.big ? 36 : 24;
+      const bottom = p.big ? 22 : 18;
       const g = svg.append("g").attr("transform", `translate(${p.x0},${p.y0})`);
       const x = d3.scaleLinear().domain([0.5, FOLDED + 0.5]).range([0, p.w]);
       const y = d3.scaleLinear().domain([0, yMax]).range([p.h0 - bottom, top]);
-      const bw = Math.max(1, x(2) - x(1) - (p.w > 500 ? 1 : 0.3));
+      const bw = Math.max(1, x(2) - x(1) - (p.w > 500 ? 1.5 : 0.4));
 
-      // gridlines (big panel only), baseline
       if (p.big) {
         for (const t of y.ticks(4).filter((t) => t > 0)) {
           g.append("line").attr("class", "gridline").attr("x1", 0).attr("x2", p.w).attr("y1", y(t)).attr("y2", y(t));
-          g.append("text").attr("x", -yAxisW).attr("y", y(t) + 4).text(`${t}%`);
+          g.append("text").attr("x", -yAxisW).attr("y", y(t) + 4).text(pct(t, 0));
         }
       }
       g.append("line").attr("class", "axisline").attr("x1", 0).attr("x2", p.w).attr("y1", y(0)).attr("y2", y(0));
 
-      // the line
-      const lx = x(line);
+      const lx = x(line) + bw / 2 + 1;
       g.append("line")
         .attr("x1", lx)
         .attr("x2", lx)
-        .attr("y1", top - (p.big ? 18 : 6))
+        .attr("y1", top - (p.big ? 20 : 8))
         .attr("y2", y(0))
         .attr("stroke", COLOURS.ink)
-        .attr("stroke-dasharray", "3 3")
-        .attr("opacity", 0.55);
+        .attr("stroke-width", p.big ? 1.5 : 1);
       if (p.big) {
         g.append("text")
-          .attr("class", "lab hl")
+          .attr("class", "lab-strong hl")
           .attr("x", narrow ? lx - 6 : lx + 8)
-          .attr("y", top - 8)
+          .attr("y", top - 10)
           .attr("text-anchor", narrow ? "end" : "start")
-          .text(narrow ? `tourist stay: ${line} days or fewer` : `Catalan tourist-stay limit: ${line} days or fewer`);
+          .text(narrow ? T.wall.lineNarrow(line) : T.wall.lineWide(line));
       }
 
-      const sel = g
-        .selectAll<SVGRectElement, CityHistogram["rows"][number]>("rect.bar")
+      const bars = g
+        .selectAll<SVGRectElement, Row>("rect.bar")
         .data(p.h.rows)
         .join("rect")
         .attr("class", "bar")
         .attr("x", (d) => x(d.nights) - bw / 2)
         .attr("width", bw)
-        .attr("rx", p.big && bw > 4 ? 1.5 : 0)
         .attr("fill", (d) => COLOURS[bandOf(d.nights, line)])
         .attr("y", (d) => (waiting ? y(0) : y(d.share)))
         .attr("height", (d) => (waiting ? 0 : y(0) - y(d.share)))
-        .on("pointermove", (event: PointerEvent, d) => {
-          sel.attr("opacity", (o) => (o === d ? 1 : 0.35));
-          const price = d.median_price === null ? "no price data" : `median asking price €${d.median_price} a night`;
-          showTip(
-            event,
-            `<b>${CITY_LABELS[p.h.city]}: ${nightsLabel(d.nights)} minimum</b>` +
-              `${formatInt(d.listings)} listings, ${pct(d.share)} of ${formatInt(p.h.total)}<br>${price}`,
-          );
-        })
-        .on("pointerleave", () => {
-          sel.attr("opacity", 1);
-          hideTip();
+        .each(function (d) {
+          this.dataset.y = String(y(d.share));
+          this.dataset.y0 = String(y(0));
         });
-      // store the scale on the selection for the reveal
-      sel.each(function (d) {
-        (this as SVGRectElement).dataset.y = String(y(d.share));
-        (this as SVGRectElement).dataset.y0 = String(y(0));
-      });
+      withTip(
+        bars,
+        (d) =>
+          `<b>${cityName(p.h.city)}: ${T.minimum(nightsLabel(d.nights))}</b>${T.listingsOf(formatInt(d.listings), pct(d.share), formatInt(p.h.total))}<br>` +
+          (d.median_price === null ? T.noPrice : T.askingPrice(euro(d.median_price))),
+        (d) => bars.attr("opacity", (o) => (d === null || o === d ? 1 : 0.35)),
+      );
 
-      // city name and its 31+ share
-      const plus = share(d3.sum(p.h.rows.filter((r) => r.nights >= line), (r) => r.listings), p.h.total);
       const name = g
         .append("text")
         .attr("class", "lab-strong hl")
         .attr("x", p.w)
-        .attr("y", p.big ? top + 18 : top - 6)
+        .attr("y", p.big ? top + 20 : top - 8)
         .attr("text-anchor", "end");
-      name.append("tspan").text(CITY_LABELS[p.h.city]);
-      name
-        .append("tspan")
-        .attr("class", "lab")
-        .attr("dx", 6)
-        .style("font-weight", "400")
-        .style("fill", COLOURS.ink2)
-        .text(`${pct(plus, 0)} ask ${line}+`);
+      name.append("tspan").text(cityName(p.h.city));
+      name.append("tspan").attr("dx", 6).style("font-weight", "400").text(T.wall.askPlus(pct(plusShare(p.h), 0), line));
 
-      // x ticks
       const ticks = p.big ? (narrow ? [1, 14, line, FOLDED] : [1, 7, 14, 21, 28, line, FOLDED]) : [1, line, FOLDED];
       for (const t of ticks) {
         g.append("text")
           .attr("x", x(t))
           .attr("y", p.h0 - (p.big ? 4 : 2))
           .attr("text-anchor", t === 1 ? "start" : t === FOLDED ? "end" : "middle")
-          .text(t === FOLDED ? `${t}+` : t === 1 && p.big ? "1 night" : String(t));
+          .text(t === FOLDED ? `${t}+` : t === 1 && p.big ? T.wall.oneNight : String(t));
       }
 
-      // direct labels on Barcelona's three peaks
       if (p.big) {
         for (const n of [1, line, line + 1]) {
           const d = p.h.rows.find((r) => r.nights === n);
           if (!d) continue;
-          const anchorEnd = n === line;
+          const left = n === line;
           g.append("text")
             .attr("class", "lab-strong hl peak")
-            .attr("x", x(n) + (n === 1 ? bw / 2 + 6 : anchorEnd ? -bw / 2 - 5 : bw / 2 + 5))
+            .attr("x", x(n) + (left ? -bw / 2 - 6 : bw / 2 + 6))
             .attr("y", y(d.share) + 14)
-            .attr("text-anchor", anchorEnd ? "end" : "start")
+            .attr("text-anchor", left ? "end" : "start")
             .attr("opacity", waiting ? 0 : 1)
-            .text(narrow && n !== 1 ? pct(d.share, 0) : `${n} night${n === 1 ? "" : "s"}: ${pct(d.share, 0)}`);
+            .text(narrow && n !== 1 ? pct(d.share, 0) : `${nightsLabel(n)}: ${pct(d.share, 0)}`);
         }
       }
     }
@@ -251,7 +209,7 @@ export function initWall(rows: NightsRow[], line: number): () => void {
           .selectAll<SVGRectElement, unknown>("rect.bar")
           .transition()
           .duration(MOTION_MS)
-          .delay((_, i) => i * 4)
+          .delay((_, i) => i * 3)
           .ease(d3.easeCubicOut)
           .attr("y", function () {
             return Number(this.dataset.y);
@@ -259,7 +217,7 @@ export function initWall(rows: NightsRow[], line: number): () => void {
           .attr("height", function () {
             return Number(this.dataset.y0) - Number(this.dataset.y);
           });
-        svg.selectAll("text.peak").transition().delay(MOTION_MS * 0.8).duration(400).attr("opacity", 1);
+        svg.selectAll("text.peak").transition().delay(MOTION_MS * 0.8).duration(300).attr("opacity", 1);
       });
     }
   };

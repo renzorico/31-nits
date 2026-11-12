@@ -288,11 +288,14 @@ POST_OBSERVATION_DEVELOPMENTS = [
             "Published after every snapshot used here, so it cannot explain "
             "any change in the data. A decree-law must be validated by "
             "Congress within 30 days; with the Cortes dissolved, the vote fell "
-            "to the Diputación Permanente, scheduled for 12 Nov 2026. Its "
-            "result was not checked here. Summary read from the BOE text "
+            "to the Diputación Permanente, scheduled for 12 Nov 2026. The "
+            "result was not yet known when this page was published. Summary read from the BOE text "
             "(BOE-A-2026-20823, 7 Oct 2026)."
         ),
         "url": "https://www.boe.es/buscar/doc.php?id=BOE-A-2026-20823",
+        "label": "Real Decreto-ley 29/2026",
+        "short_label": "RDL 29/2026",
+        "law": "Real Decreto-ley 29/2026, de 6 de octubre (BOE 7 Oct 2026) · Spain",
     }
 ]
 
@@ -301,5 +304,316 @@ CONTEXT_EVENTS = {
     "general_election": "2026-11-29",
     "municipal_election": "2027-05-23",
 }
+
+# ---- translations -------------------------------------------------------
+# Spanish and Catalan versions of the reader-facing lever texts. Law names
+# stay in their official language. Same facts, same dates as the English
+# records above; review by a native speaker before relying on the legal lines.
+LEVER_I18N = {
+    "tourist_licence_phase_out": {
+        "es": {
+            "title": "Fin progresivo de las licencias de vivienda de uso turístico",
+            "timeline_label": "Fin de licencias",
+            "jurisdiction": "Cataluña (municipios con problemas de acceso a la vivienda, incluida Barcelona)",
+            "rule": (
+                "Las viviendas de uso turístico (HUT) existentes en los municipios afectados deben "
+                "obtener una licencia urbanística en un plazo de 5 años desde el decreto o dejar de funcionar."
+            ),
+            "exceptions": [
+                "Los propietarios pueden pedir una única prórroga de hasta 5 años más, después del cuarto "
+                "año y antes de que acabe el plazo (disposición transitoria 1.2).",
+            ],
+            "status": (
+                "Vigente. Convalidado por el Parlament de Catalunya el 20 dic. 2023; el recurso de "
+                "inconstitucionalidad se desestimó por completo (STC 64/2025, 13 mar. 2025)."
+            ),
+            "notes": (
+                "El 9 nov. 2028 termina la transición autonómica. El Ayuntamiento de Barcelona ha dicho "
+                "que no prevé conceder las nuevas licencias (prensa de junio de 2024, no reverificada), así "
+                "que se espera que la mayoría de licencias caduquen. Es una política anunciada, no un texto legal."
+            ),
+            "data_limits": (
+                "Qué viviendas obtendrán una licencia o una prórroga, y en qué se convertirán las demás "
+                "después de 2028: viviendas habituales, alquileres de temporada, ventas o anuncios en otras "
+                "plataformas. Un registro estable antes de una fecha límite no dice nada sobre si la política "
+                "funcionará, y la baja de un uso turístico no demuestra que el piso pase a alquiler residencial."
+            ),
+        },
+        "ca": {
+            "title": "Fi progressiu de les llicències d'habitatge d'ús turístic",
+            "timeline_label": "Fi de llicències",
+            "jurisdiction": "Catalunya (municipis amb problemes d'accés a l'habitatge, Barcelona inclosa)",
+            "rule": (
+                "Els habitatges d'ús turístic (HUT) existents als municipis afectats han d'obtenir una "
+                "llicència urbanística en un termini de 5 anys des del decret o deixar de funcionar."
+            ),
+            "exceptions": [
+                "Els propietaris poden demanar una única pròrroga de fins a 5 anys més, després del quart "
+                "any i abans que acabi el termini (disposició transitòria 1.2).",
+            ],
+            "status": (
+                "Vigent. Convalidat pel Parlament de Catalunya el 20 des. 2023; el recurs "
+                "d'inconstitucionalitat es va desestimar íntegrament (STC 64/2025, 13 març 2025)."
+            ),
+            "notes": (
+                "El 9 nov. 2028 acaba la transició autonòmica. L'Ajuntament de Barcelona ha dit que no "
+                "preveu concedir les noves llicències (premsa del juny del 2024, no reverificada), de manera "
+                "que s'espera que la majoria de llicències caduquin. És una política anunciada, no un text legal."
+            ),
+            "data_limits": (
+                "Quins habitatges obtindran una llicència o una pròrroga, i què esdevindran els altres "
+                "després del 2028: habitatges habituals, lloguers de temporada, vendes o anuncis en altres "
+                "plataformes. Un registre estable abans d'una data límit no diu res sobre si la política "
+                "funcionarà, i la baixa d'un ús turístic no demostra que el pis passi a lloguer residencial."
+            ),
+        },
+    },
+    "rent_cap": {
+        "es": {
+            "title": "Límite del alquiler en zonas tensionadas",
+            "timeline_label": "Límite del alquiler",
+            "jurisdiction": "España; aplicado en las zonas catalanas declaradas por la Generalitat",
+            "rule": (
+                "En una zona tensionada declarada, un nuevo contrato de alquiler de vivienda no puede "
+                "superar la última renta de los cinco años anteriores (tras su actualización anual). A los "
+                "grandes tenedores se les aplica en su lugar el máximo del índice de referencia "
+                "(LAU art. 17.6 y 17.7)."
+            ),
+            "exceptions": [
+                "Hasta un 10 % más sobre la renta anterior si la vivienda se ha rehabilitado o mejorado "
+                "recientemente, o si el contrato dura 10 años o más.",
+                "Una vivienda sin contrato en los últimos cinco años solo queda limitada por el índice "
+                "cuando así lo dice la resolución del ministerio para esa zona.",
+            ],
+            "status": (
+                "Vigente. La zona es válida durante 3 años desde el 16 mar. 2024 y se ha prorrogado para "
+                "118 municipios mediante la Resolució TER/3739/2026 (DOGC 19 oct. 2026)."
+            ),
+            "notes": (
+                "Barcelona está en la lista técnica de la Generalitat para la prórroga; no se ha "
+                "comprobado la fecha de fin de la prórroga."
+            ),
+            "data_limits": (
+                "Si el límite causó algún cambio. La renta media se mueve con el tipo de pisos alquilados, "
+                "y los tipos de interés, los salarios y la oferta mueven los alquileres al mismo tiempo. "
+                "Tampoco se ve si cada contrato lo cumple."
+            ),
+        },
+        "ca": {
+            "title": "Límit del lloguer a les àrees de mercat residencial tens",
+            "timeline_label": "Límit del lloguer",
+            "jurisdiction": "Espanya; aplicat a les àrees catalanes declarades per la Generalitat",
+            "rule": (
+                "En una àrea de mercat residencial tens declarada, un nou contracte de lloguer d'habitatge "
+                "no pot superar l'última renda dels cinc anys anteriors (després de l'actualització anual). "
+                "Als grans tenidors se'ls aplica en canvi el màxim de l'índex de referència "
+                "(LAU art. 17.6 i 17.7)."
+            ),
+            "exceptions": [
+                "Fins a un 10 % més sobre la renda anterior si l'habitatge s'ha rehabilitat o millorat "
+                "recentment, o si el contracte dura 10 anys o més.",
+                "Un habitatge sense contracte els últims cinc anys només queda limitat per l'índex quan "
+                "així ho diu la resolució del ministeri per a aquella àrea.",
+            ],
+            "status": (
+                "Vigent. L'àrea és vàlida durant 3 anys des del 16 març 2024 i s'ha prorrogat per a "
+                "118 municipis mitjançant la Resolució TER/3739/2026 (DOGC 19 oct. 2026)."
+            ),
+            "notes": (
+                "Barcelona és a la llista tècnica de la Generalitat per a la pròrroga; no s'ha comprovat "
+                "la data de fi de la pròrroga."
+            ),
+            "data_limits": (
+                "Si el límit va causar algun canvi. La renda mitjana es mou amb el tipus de pisos llogats, "
+                "i els tipus d'interès, els salaris i l'oferta mouen els lloguers alhora. Tampoc no es veu "
+                "si cada contracte el compleix."
+            ),
+        },
+    },
+    "seasonal_rentals": {
+        "es": {
+            "title": "Límite del alquiler extendido a los alquileres de temporada",
+            "timeline_label": "Límite en alquiler de temporada",
+            "jurisdiction": "Cataluña",
+            "rule": (
+                "En una zona tensionada, un alquiler de temporada que no sea para un uso exclusivamente "
+                "vacacional o de ocio se trata como un alquiler de vivienda, así que se le aplican los mismos "
+                "límites de renta. Las rentas de los contratos de habitaciones simultáneos no pueden superar "
+                "el máximo de la vivienda entera."
+            ),
+            "exceptions": [
+                "Los alquileres para un uso exclusivamente recreativo, turístico o vacacional quedan fuera "
+                "de la norma (nuevo art. 66 bis de la Llei 18/2007).",
+            ],
+            "status": (
+                "Vigente. El 9 jun. 2026 se admitió a trámite un recurso de inconstitucionalidad (recurso "
+                "2415-2026, contra los arts. 2.2, 3.8, 5.5, 5.6, 5.8, 5.9, 5.14, 5.15 y 8.1). En la fecha de "
+                "comprobación no constaba sentencia; las fuentes consultadas no mencionan ninguna suspensión."
+            ),
+            "notes": "",
+            "data_limits": (
+                "Si los alquileres de temporada respetan el límite (eso requiere la superficie de cada piso "
+                "y el índice oficial), cuánto se quedan realmente los huéspedes, y si el descenso invernal "
+                "después de enero se debe a la ley o a un patrón estacional normal."
+            ),
+        },
+        "ca": {
+            "title": "Límit del lloguer estès als lloguers de temporada",
+            "timeline_label": "Límit al lloguer de temporada",
+            "jurisdiction": "Catalunya",
+            "rule": (
+                "En una àrea tensa, un lloguer de temporada que no sigui per a un ús exclusivament "
+                "vacacional o d'oci es tracta com un lloguer d'habitatge, de manera que s'hi apliquen els "
+                "mateixos límits de renda. Les rendes dels contractes d'habitacions simultanis no poden "
+                "superar el màxim de l'habitatge sencer."
+            ),
+            "exceptions": [
+                "Els lloguers per a un ús exclusivament recreatiu, turístic o vacacional queden fora de la "
+                "norma (nou art. 66 bis de la Llei 18/2007).",
+            ],
+            "status": (
+                "Vigent. El 9 juny 2026 es va admetre a tràmit un recurs d'inconstitucionalitat (recurs "
+                "2415-2026, contra els arts. 2.2, 3.8, 5.5, 5.6, 5.8, 5.9, 5.14, 5.15 i 8.1). En la data de "
+                "comprovació no constava cap sentència; les fonts consultades no esmenten cap suspensió."
+            ),
+            "notes": "",
+            "data_limits": (
+                "Si els lloguers de temporada respecten el límit (cal la superfície de cada pis i l'índex "
+                "oficial), quant es queden realment els hostes, i si la baixada hivernal després de gener es "
+                "deu a la llei o a un patró estacional normal."
+            ),
+        },
+    },
+    "owners_vote_catalonia": {
+        "es": {
+            "title": "Voto de los propietarios sobre el uso turístico: Cataluña",
+            "timeline_label": "Voto de propietarios (Cataluña)",
+            "jurisdiction": "Cataluña (régimen propio de propiedad horizontal en su Código civil)",
+            "rule": (
+                "Restringir el uso turístico mediante los estatutos de la comunidad supone modificarlos, lo "
+                "que exige el voto de 4/5 de los propietarios que representen también 4/5 de las cuotas de "
+                "participación (Código civil de Cataluña, art. 553-26.2.a)."
+            ),
+            "exceptions": [
+                "El artículo se aplica salvo que una disposición legal diga otra cosa; no se han buscado de "
+                "forma exhaustiva normas catalanas específicas de turismo.",
+            ],
+            "status": "Vigente (libro quinto en vigor desde el 1 jul. 2006; artículo comprobado en su versión consolidada).",
+            "notes": (
+                "Que la regla estatal de tres quintos no se aplica en Cataluña, y que una prohibición solo "
+                "alcanza a las nuevas licencias turísticas, lo recogen la prensa catalana (3Cat, VilaWeb, "
+                "Betevé) y un análisis jurídico de la Generalitat; el propio texto legal da la mayoría de 4/5."
+            ),
+            "data_limits": "Nada a escala de edificio. Los archivos no tienen datos sobre comunidades de propietarios ni sus votaciones.",
+        },
+        "ca": {
+            "title": "Vot dels propietaris sobre l'ús turístic: Catalunya",
+            "timeline_label": "Vot de propietaris (Catalunya)",
+            "jurisdiction": "Catalunya (règim propi de propietat horitzontal al seu Codi civil)",
+            "rule": (
+                "Restringir l'ús turístic mitjançant els estatuts de la comunitat vol dir modificar-los, cosa "
+                "que exigeix el vot de 4/5 dels propietaris que representin també 4/5 de les quotes de "
+                "participació (Codi civil de Catalunya, art. 553-26.2.a)."
+            ),
+            "exceptions": [
+                "L'article s'aplica llevat que una disposició legal digui una altra cosa; no s'han cercat de "
+                "manera exhaustiva normes catalanes específiques de turisme.",
+            ],
+            "status": "Vigent (llibre cinquè en vigor des de l'1 jul. 2006; article comprovat en la versió consolidada).",
+            "notes": (
+                "Que la regla estatal de tres cinquens no s'aplica a Catalunya, i que una prohibició només "
+                "afecta les noves llicències turístiques, ho recullen la premsa catalana (3Cat, VilaWeb, "
+                "Betevé) i una anàlisi jurídica de la Generalitat; el text legal mateix fixa la majoria de 4/5."
+            ),
+            "data_limits": "Res a escala d'edifici. Els fitxers no tenen dades sobre comunitats de propietaris ni les seves votacions.",
+        },
+    },
+    "owners_approval_spain": {
+        "es": {
+            "title": "Aprobación de los propietarios para alquileres turísticos: resto de España",
+            "timeline_label": "Aprobación de propietarios (ES)",
+            "jurisdiction": "España, Ley de Propiedad Horizontal (se aplica en Madrid, Valencia, Málaga y Sevilla)",
+            "rule": (
+                "Un nuevo alquiler turístico necesita la aprobación previa y expresa de la comunidad. "
+                "Aprobar, limitar, condicionar o prohibir los alquileres turísticos requiere 3/5 de los "
+                "propietarios que representen también 3/5 de las cuotas (LPH arts. 5.3 y 17.12, en la "
+                "redacción de la LO 1/2025)."
+            ),
+            "exceptions": [
+                "Los alquileres que ya funcionaban antes del 3 abr. 2025 conforme a la normativa turística "
+                "pueden continuar (disposición adicional segunda).",
+            ],
+            "status": "Vigente.",
+            "notes": "",
+            "data_limits": "Nada a escala de edificio. Los archivos no tienen datos sobre comunidades de propietarios ni sus votaciones.",
+        },
+        "ca": {
+            "title": "Aprovació dels propietaris per als lloguers turístics: resta d'Espanya",
+            "timeline_label": "Aprovació de propietaris (ES)",
+            "jurisdiction": "Espanya, Ley de Propiedad Horizontal (s'aplica a Madrid, València, Màlaga i Sevilla)",
+            "rule": (
+                "Un nou lloguer turístic necessita l'aprovació prèvia i expressa de la comunitat. Aprovar, "
+                "limitar, condicionar o prohibir els lloguers turístics requereix 3/5 dels propietaris que "
+                "representin també 3/5 de les quotes (LPH arts. 5.3 i 17.12, en la redacció de la LO 1/2025)."
+            ),
+            "exceptions": [
+                "Els lloguers que ja funcionaven abans del 3 abr. 2025 d'acord amb la normativa turística "
+                "poden continuar (disposició addicional segona).",
+            ],
+            "status": "Vigent.",
+            "notes": "",
+            "data_limits": "Res a escala d'edifici. Els fitxers no tenen dades sobre comunitats de propietaris ni les seves votacions.",
+        },
+    },
+}
+for _key, _texts in LEVER_I18N.items():
+    POLICY_LEVERS[_key]["i18n"] = _texts
+
+LATER_I18N = {
+    "2026-10-07": {
+        "es": {
+            "title": "Real Decreto-ley 29/2026: decreto estatal de vivienda",
+            "summary": (
+                "Modifica la Ley de Arrendamientos Urbanos (LAU) en los alquileres de temporada y por "
+                "habitaciones: un contrato de temporada necesita una causa real y acreditable por la que el "
+                "inquilino viva fuera de su vivienda habitual, y debe durar más de 31 días y, como regla "
+                "general, no más de 12 meses; en zonas tensionadas se le aplican los límites de renta del "
+                "art. 17 de la LAU. También limita las actualizaciones anuales de la renta al 2 % hasta el "
+                "31 dic. 2027."
+            ),
+            "note": (
+                "Publicado después de todas las capturas usadas aquí, así que no puede explicar ningún "
+                "cambio en los datos. Un real decreto-ley debe convalidarse en el Congreso en 30 días; con "
+                "las Cortes disueltas, la votación correspondía a la Diputación Permanente, prevista para el "
+                "12 nov. 2026. Al publicar esta página aún no se conocía el resultado. Resumen leído del texto del BOE "
+                "(BOE-A-2026-20823, 7 oct. 2026)."
+            ),
+        },
+        "ca": {
+            "title": "Real Decreto-ley 29/2026: decret estatal d'habitatge",
+            "summary": (
+                "Modifica la Ley de Arrendamientos Urbanos (LAU) en els lloguers de temporada i per "
+                "habitacions: un contracte de temporada necessita una causa real i acreditable per la qual "
+                "l'inquilí visqui fora del seu habitatge habitual, i ha de durar més de 31 dies i, com a regla "
+                "general, no més de 12 mesos; a les àrees tenses s'hi apliquen els límits de renda de l'art. 17 "
+                "de la LAU. També limita les actualitzacions anuals de la renda al 2 % fins al 31 des. 2027."
+            ),
+            "note": (
+                "Publicat després de totes les captures que s'usen aquí, de manera que no pot explicar cap "
+                "canvi en les dades. Un reial decret llei s'ha de convalidar al Congrés en 30 dies; amb les "
+                "Corts dissoltes, la votació corresponia a la Diputació Permanent, prevista per al "
+                "12 nov. 2026. En publicar aquesta pàgina encara no se'n coneixia el resultat. Resum llegit del text del BOE "
+                "(BOE-A-2026-20823, 7 oct. 2026)."
+            ),
+        },
+    },
+}
+for _later in POST_OBSERVATION_DEVELOPMENTS:
+    if _later["date"] in LATER_I18N:
+        _later["i18n"] = LATER_I18N[_later["date"]]
+
+# ---- publication ---------------------------------------------------------
+AUTHOR = "Renzo Rico"
+PUBLISHED_ON = "2026-11-12"
 
 SEED = 42

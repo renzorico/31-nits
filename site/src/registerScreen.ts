@@ -1,31 +1,18 @@
-// Screen: the tourist-flat register as 10,000+ squares, one per licence
-// number, lit when that number appears on a listing with open dates.
+// The tourist-flat register against Airbnb: per snapshot, the share of the
+// register's licence numbers shown on at least one listing with open dates.
 import * as d3 from "d3";
 
 import type { PolicyLever, Register } from "./data";
-import {
-  COLOURS,
-  dayMonthYear,
-  formatInt,
-  heightOf,
-  insetOf,
-  isWaiting,
-  monthYear,
-  MOTION_MS,
-  pct,
-  revealOnView,
-  setLegend,
-  setText,
-  widthOf,
-} from "./story";
+import { registerQuarter, T } from "./i18n";
+import { chartHeight, COLOURS, dayMonthYear, formatInt, freshSvg, insetOf, isWaiting, monthYear, MOTION_MS, pct, revealOnView, setText, widthOf, withTip } from "./story";
 
-const OFF = "#2f2e2b";
 const DAY_MS = 86_400_000;
 
-function quarterLabel(code: string): string {
-  // "2026_3T" -> "Q3 2026"
-  const [year, q] = code.split("_");
-  return `Q${(q ?? "").replace("T", "")} ${year}`;
+/** Whole calendar days from the reader's local today, so the count does not jump at UTC midnight. */
+export function daysUntil(iso: string): number {
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((Date.parse(`${iso}T00:00:00Z`) - today) / DAY_MS);
 }
 
 export function initRegisterScreen(register: Register, phaseOut: PolicyLever | undefined): () => void {
@@ -34,95 +21,84 @@ export function initRegisterScreen(register: Register, phaseOut: PolicyLever | u
   const totals = Object.entries(register.totals).sort(([a], [b]) => a.localeCompare(b));
   const first = totals[0];
   const last = totals.at(-1);
-  const lit = latest.displayed_numbers_found_in_register;
-  const all = latest.register_numbers;
   const deadline = phaseOut?.deadline ?? null;
-  // whole calendar days from the reader's local today, so the count does not jump at UTC midnight
-  const now = new Date();
-  const todayUtc = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-  const daysLeft = deadline ? Math.round((Date.parse(`${deadline}T00:00:00Z`) - todayUtc) / DAY_MS) : null;
+  const days = deadline ? daysUntil(deadline) : null;
 
-  setText(
-    "register-title",
-    `${pct(latest.register_numbers_displayed_pct, 0)} of Barcelona's ${formatInt(all)} tourist-flat licence numbers appear on an Airbnb listing with open dates.`,
-  );
+  setText("register-title", T.register.title(pct(latest.register_numbers_displayed_pct, 0), formatInt(latest.register_numbers)));
   setText(
     "register-sub",
-    `The city's register has barely moved: ${formatInt(first?.[1] ?? 0)} records in ${quarterLabel(first?.[0] ?? "")}, ${formatInt(last?.[1] ?? 0)} in ${quarterLabel(last?.[0] ?? "")}. ` +
-      (deadline
-        ? `Under a 2023 Catalan decree these flats need an urban-planning licence by ${dayMonthYear(deadline)} or must stop operating as tourist flats${daysLeft !== null && daysLeft > 0 ? `: ${formatInt(daysLeft)} days from today` : ""}.`
-        : ""),
+    T.register.sub(
+      formatInt(first?.[1] ?? 0),
+      registerQuarter(first?.[0] ?? ""),
+      formatInt(last?.[1] ?? 0),
+      registerQuarter(last?.[0] ?? ""),
+      formatInt(latest.register_numbers),
+      deadline ? dayMonthYear(deadline) : null,
+      days !== null && days > 0 ? formatInt(days) : null,
+    ),
   );
-  setText(
-    "register-how",
-    `Each square is one licence number in the ${quarterLabel(latest.register_quarter)} register; it is lit when that number is shown on at least one listing with open dates in the ${monthYear(latest.snapshot)} snapshot. ` +
-      `${pct(latest.displayed_found_pct)} of the numbers listings display exist in the register. A match shows the number exists; it does not show the listing is that flat. ` +
-      "An unlit square is not an empty flat: it may let on other platforms, directly, or not at all. Owners can ask for one extension of up to five years. " +
-      "The council has said (June 2024 press reports) that it does not plan to grant the new licences; that is a stated policy, not a legal text.",
-  );
-  setLegend("register-legend", [
-    [`Shown on Airbnb · ${formatInt(lit)}`, COLOURS.green],
-    [`Not shown on a listing with open dates · ${formatInt(all - lit)}`, OFF],
-  ]);
+  setText("register-how", T.register.how(registerQuarter(latest.register_quarter), monthYear(latest.snapshot), pct(latest.displayed_found_pct)));
+  document.getElementById("register-ramp")?.replaceChildren();
 
   const root = document.getElementById("register-chart") as HTMLElement;
   const KEY = "register";
+  const rows = register.match;
   return () => {
     const W = widthOf(root);
-    const H = heightOf(root, Math.min(560, Math.max(360, W * 0.9)));
+    const H = chartHeight(W, 280, 360, 0.3);
     const inset = insetOf();
-    root.replaceChildren();
-    root.setAttribute(
-      "aria-label",
-      `Unit chart of ${formatInt(all)} licence numbers; ${formatInt(lit)} are lit because they appear on an Airbnb listing with open dates.`,
-    );
-    const innerW = W - 2 * inset;
-    // largest square cell that fits all numbers in the box
-    let cell = Math.floor(Math.sqrt((innerW * H) / all));
-    let cols = Math.floor(innerW / cell);
-    while (cell > 2 && cols * Math.floor(H / cell) < all) {
-      cell -= 1;
-      cols = Math.floor(innerW / cell);
+    const svg = freshSvg(root, W, H, T.register.aria(rows.map((r) => `${monthYear(r.snapshot)} ${pct(r.register_numbers_displayed_pct)}`).join(", ")));
+    const x = d3.scaleBand<string>().domain(rows.map((r) => r.snapshot)).range([inset + 40, W - inset]).padding(0.38);
+    const y = d3.scaleLinear().domain([0, 100]).range([H - 44, 12]);
+    for (const t of [25, 50, 75, 100]) {
+      svg.append("line").attr("class", "gridline").attr("x1", inset + 40).attr("x2", W - inset).attr("y1", y(t)).attr("y2", y(t));
+      svg.append("text").attr("x", inset).attr("y", y(t) + 4).text(pct(t, 0));
     }
-    const rows = Math.ceil(all / cols);
-    const gap = cell >= 6 ? 1 : cell >= 4 ? 0.6 : 0;
-    const usedW = cols * cell;
-    const usedH = rows * cell;
-    const dpr = Math.min(2, devicePixelRatio || 1);
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(usedH * dpr);
-    canvas.style.width = `${W}px`;
-    canvas.style.height = `${usedH}px`;
-    canvas.style.marginTop = `${Math.max(0, (H - usedH) / 2)}px`;
-    root.append(canvas);
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.scale(dpr, dpr);
-    const x0 = inset + (innerW - usedW) / 2;
-
-    const paint = (litCount: number) => {
-      ctx.clearRect(0, 0, W, usedH);
-      for (let i = 0; i < all; i += 1) {
-        const col = i % cols;
-        const row = Math.floor(i / cols);
-        ctx.fillStyle = i < litCount ? COLOURS.green : OFF;
-        ctx.fillRect(x0 + col * cell, row * cell, cell - gap, cell - gap);
-      }
-    };
-
-    if (isWaiting(KEY)) {
-      paint(0);
+    svg.append("line").attr("class", "axisline").attr("x1", inset + 40).attr("x2", W - inset).attr("y1", y(0)).attr("y2", y(0));
+    const waiting = isWaiting(KEY);
+    const g = svg.append("g");
+    // the whole register as a pale bar, the share shown on Airbnb in green on top
+    g.selectAll("rect.all")
+      .data(rows)
+      .join("rect")
+      .attr("x", (r) => x(r.snapshot) ?? 0)
+      .attr("width", x.bandwidth())
+      .attr("y", y(100))
+      .attr("height", y(0) - y(100))
+      .attr("fill", COLOURS.none);
+    const bars = g
+      .selectAll<SVGRectElement, (typeof rows)[number]>("rect.shown")
+      .data(rows)
+      .join("rect")
+      .attr("class", "shown")
+      .attr("x", (r) => x(r.snapshot) ?? 0)
+      .attr("width", x.bandwidth())
+      .attr("y", (r) => (waiting ? y(0) : y(r.register_numbers_displayed_pct)))
+      .attr("height", (r) => (waiting ? 0 : y(0) - y(r.register_numbers_displayed_pct)))
+      .attr("fill", COLOURS.green);
+    const labels = g
+      .selectAll("text.val")
+      .data(rows)
+      .join("text")
+      .attr("class", "on-fill val")
+      .attr("x", (r) => (x(r.snapshot) ?? 0) + x.bandwidth() / 2)
+      .attr("y", (r) => y(r.register_numbers_displayed_pct) + 20)
+      .attr("text-anchor", "middle")
+      .attr("opacity", waiting ? 0 : 1)
+      .text((r) => pct(r.register_numbers_displayed_pct, 0));
+    for (const r of rows) {
+      const cx = (x(r.snapshot) ?? 0) + x.bandwidth() / 2;
+      svg.append("text").attr("class", "lab-strong").attr("x", cx).attr("y", H - 24).attr("text-anchor", "middle").text(monthYear(r.snapshot));
+      svg.append("text").attr("x", cx).attr("y", H - 8).attr("text-anchor", "middle").text(T.register.vs(registerQuarter(r.register_quarter)));
+    }
+    withTip(bars, (r) =>
+      T.register.tip(monthYear(r.snapshot), formatInt(r.displayed_numbers_found_in_register), formatInt(r.register_numbers), registerQuarter(r.register_quarter), pct(r.register_numbers_displayed_pct)),
+    );
+    if (waiting) {
       revealOnView(KEY, root, () => {
-        const ease = d3.easeCubicInOut;
-        const timer = d3.timer((elapsed) => {
-          const t = Math.min(1, elapsed / (MOTION_MS * 1.4));
-          paint(Math.round(ease(t) * lit));
-          if (t >= 1) timer.stop();
-        });
+        bars.transition().duration(MOTION_MS).delay((_, i) => i * 100).ease(d3.easeCubicOut).attr("y", (r) => y(r.register_numbers_displayed_pct)).attr("height", (r) => y(0) - y(r.register_numbers_displayed_pct));
+        labels.transition().delay(MOTION_MS + 300).duration(300).attr("opacity", 1);
       });
-    } else {
-      paint(lit);
     }
   };
 }

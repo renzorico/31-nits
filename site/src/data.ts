@@ -18,7 +18,13 @@ export interface Source {
   licence: string;
 }
 
+/** Translated fields for "es" and "ca"; English is the record itself. */
+export type Translations<F extends string> = Partial<Record<"es" | "ca", Partial<Record<F, string | string[]>>>>;
+
+export type LeverField = "title" | "timeline_label" | "jurisdiction" | "rule" | "exceptions" | "status" | "notes" | "data_limits";
+
 export interface PolicyLever {
+  i18n?: Translations<LeverField>;
   title: string;
   timeline_label: string;
   jurisdiction: string;
@@ -36,8 +42,14 @@ export interface PolicyLever {
   data_limits: string;
 }
 
+export type LaterField = "title" | "label" | "short_label" | "summary" | "note";
+
 export interface LaterDevelopment {
+  i18n?: Translations<LaterField>;
   date: string;
+  label: string;
+  short_label: string;
+  law: string;
   title: string;
   summary: string;
   note: string;
@@ -54,8 +66,11 @@ export interface Meta {
   context_events: Record<string, string>;
   stay_line_nights: number;
   professional_min: number;
+  author: string;
+  published_on: string;
   sources: Source[];
   caveats: string[];
+  caveats_i18n?: Partial<Record<"es" | "ca", string[]>>;
 }
 
 /** One quarter's Barcelona listings with open dates, as parallel arrays. */
@@ -233,6 +248,7 @@ export const loadConcentration = () => loadJson<Concentration>("concentration.js
 export const loadNeighbourhoods = () => loadJson<NeighbourhoodRow[]>("neighbourhoods.json");
 export const loadRents = () => loadJson<RentRow[]>("rents.json");
 export const loadTrends = () => loadJson<BarcelonaTrend[]>("barcelona_trends.json");
+export const loadGeo = () => loadJson<import("geojson").FeatureCollection>("neighbourhoods.geojson");
 
 // Map files are ~400 kB each, so they are fetched on demand and cached.
 const pointsCache = new Map<string, Promise<Points>>();

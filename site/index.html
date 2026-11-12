@@ -6,101 +6,101 @@
     <title>The 31-Night Line: Barcelona's Airbnb listings and the housing rules</title>
     <meta
       name="description"
-      content="Barcelona's Airbnb listings split in two: one night, or a month and more. What four quarterly snapshots, the tourist-flat register and official rents show about the housing rules, and what they cannot show."
+      content="Barcelona's Airbnb listings split in two: one night, or a month and more. An atlas of four quarterly snapshots, the tourist-flat register and official rents, in English, Spanish and Catalan."
     />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#0f0f0e" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#f7f5f0" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href="__SITE_URL__" />
+    <link rel="alternate" hreflang="en" href="__SITE_URL__?lang=en" />
+    <link rel="alternate" hreflang="es" href="__SITE_URL__?lang=es" />
+    <link rel="alternate" hreflang="ca" href="__SITE_URL__?lang=ca" />
 
     <!-- Social previews (LinkedIn, Open Graph). __SITE_URL__ is filled in at build time (vite.config.ts). -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="article" />
     <meta property="og:url" content="__SITE_URL__" />
-    <meta property="og:title" content="The 31-Night Line" />
+    <meta property="og:title" content="The 31-Night Line · La línia de les 31 nits" />
     <meta
       property="og:description"
-      content="41.7% of Barcelona's Airbnb listings with open dates ask for 31 nights or more, against 2–8% in four other Spanish cities. What the data shows about the housing rules, and what it cannot show."
+      content="41.7% of Barcelona's Airbnb listings with open dates ask for 31 nights or more, against 2–8% in four other Spanish cities. In English, Spanish and Catalan."
     />
     <meta property="og:image" content="__SITE_URL__og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta
       property="og:image:alt"
-      content="Bar chart: Barcelona Airbnb listings by minimum stay, with peaks at 31 and 32 nights either side of the legal line."
+      content="Bar chart: Barcelona Airbnb listings by minimum stay, with peaks at 1 night and at 31 and 32 nights."
     />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to the content</a>
+    <a class="skip-link" id="skip" href="#main">Skip to the content</a>
     <div class="banner" id="banner">
-      <span class="note"><b>The 31-Night Line</b> · Airbnb in Barcelona and four Spanish cities, Dec 2025 – Sep 2026</span>
-      <span class="progress" id="progress" aria-hidden="true"></span>
+      <span class="note" id="banner-note"><b>The 31-Night Line</b></span>
+      <nav class="lang" id="lang" aria-label="Language"></nav>
     </div>
     <div id="tip" role="status" aria-live="polite"></div>
 
     <main id="main" tabindex="-1">
-      <section class="screen hero" id="top" aria-labelledby="hero-title">
-        <p class="eyebrow">Short-term rentals · housing rules · open data</p>
-        <h1 id="hero-title">4 in 10 Barcelona Airbnb listings ask for a month or more.</h1>
+      <header class="screen hero" id="top">
+        <h1 id="hero-title">4 in 10 Barcelona Airbnb listings ask guests to stay a month or more.</h1>
+        <p class="byline" id="byline"></p>
         <p class="lede" id="hero-lede"></p>
-        <div class="stats" id="hero-stats" aria-live="polite"></div>
-        <p class="scroll-hint" aria-hidden="true">Scroll ↓</p>
-      </section>
+      </header>
 
       <section class="screen" id="wall" aria-labelledby="wall-title">
         <div class="wrap head">
           <h2 id="wall-title"></h2>
           <p class="sub" id="wall-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="wall-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="wall-how"></p></details>
         </div>
         <ul class="legend" id="wall-legend"></ul>
         <div class="fill" id="wall-chart" role="img"></div>
+      </section>
+
+      <section class="screen" id="atlas" aria-labelledby="atlas-title">
+        <div class="wrap head">
+          <h2 id="atlas-title"></h2>
+          <p class="sub" id="atlas-sub"></p>
+          <details class="how"><summary></summary><p id="atlas-how"></p></details>
+        </div>
+        <div class="ramp" id="atlas-ramp"></div>
+        <div class="fill" id="atlas-chart" role="img"></div>
+        <details class="explore" id="explore">
+          <summary id="explore-summary"></summary>
+          <div class="explore-body">
+            <ul class="legend" id="map-legend"></ul>
+            <div id="map" role="img"></div>
+            <p class="sub" id="map-how"></p>
+          </div>
+        </details>
       </section>
 
       <section class="screen" id="price" aria-labelledby="price-title">
         <div class="wrap head">
           <h2 id="price-title"></h2>
           <p class="sub" id="price-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="price-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="price-how"></p></details>
         </div>
         <ul class="legend" id="price-legend"></ul>
         <div class="fill" id="price-chart" role="img"></div>
       </section>
 
-      <section class="screen" id="map-screen" aria-labelledby="map-title">
+      <section class="screen" id="hosts" aria-labelledby="hosts-title">
         <div class="wrap head">
-          <h2 id="map-title"></h2>
-          <p class="sub" id="map-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p>
-              Inside Airbnb, an independent project, publishes scraped Airbnb listings. It offsets each
-              point by up to 150 m to protect hosts' privacy, so a dot is never an address. No host or
-              listing is identified on this page. District shares are computed from the neighbourhood
-              figures the map export also uses.
-            </p>
-          </details>
+          <h2 id="hosts-title"></h2>
+          <p class="sub" id="hosts-sub"></p>
+          <details class="how"><summary></summary><p id="hosts-how"></p></details>
         </div>
-        <ul class="legend" id="map-legend"></ul>
-        <div class="fill map-fill" id="map-chart">
-          <div id="map" role="img" aria-label="Map of Barcelona's Airbnb listings with open dates, coloured by minimum stay"></div>
-        </div>
+        <div class="ramp" id="hosts-ramp"></div>
+        <div class="fill" id="hosts-chart" role="img"></div>
       </section>
 
       <section class="screen" id="flows" aria-labelledby="flows-title">
         <div class="wrap head">
           <h2 id="flows-title"></h2>
           <p class="sub" id="flows-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="flows-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="flows-how"></p></details>
         </div>
         <ul class="legend" id="flows-legend"></ul>
         <div class="fill" id="flows-chart" role="img"></div>
@@ -110,10 +110,7 @@
         <div class="wrap head">
           <h2 id="gap-title"></h2>
           <p class="sub" id="gap-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="gap-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="gap-how"></p></details>
         </div>
         <ul class="legend" id="gap-legend"></ul>
         <div class="fill" id="gap-chart" role="img"></div>
@@ -123,10 +120,7 @@
         <div class="wrap head">
           <h2 id="licences-title"></h2>
           <p class="sub" id="licences-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="licences-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="licences-how"></p></details>
         </div>
         <ul class="legend" id="licences-legend"></ul>
         <div class="fill" id="licences-chart" role="img"></div>
@@ -136,36 +130,17 @@
         <div class="wrap head">
           <h2 id="register-title"></h2>
           <p class="sub" id="register-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="register-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="register-how"></p></details>
         </div>
-        <ul class="legend" id="register-legend"></ul>
+        <div class="ramp" id="register-ramp"></div>
         <div class="fill" id="register-chart" role="img"></div>
-      </section>
-
-      <section class="screen" id="hosts" aria-labelledby="hosts-title">
-        <div class="wrap head">
-          <h2 id="hosts-title"></h2>
-          <p class="sub" id="hosts-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="hosts-how"></p>
-          </details>
-        </div>
-        <ul class="legend" id="hosts-legend"></ul>
-        <div class="fill" id="hosts-chart" role="img"></div>
       </section>
 
       <section class="screen" id="rents" aria-labelledby="rents-title">
         <div class="wrap head">
           <h2 id="rents-title"></h2>
           <p class="sub" id="rents-sub"></p>
-          <details class="how">
-            <summary>How is this made?</summary>
-            <p id="rents-how"></p>
-          </details>
+          <details class="how"><summary></summary><p id="rents-how"></p></details>
         </div>
         <ul class="legend" id="rents-legend"></ul>
         <div class="fill" id="rents-chart" role="img"></div>
@@ -180,28 +155,24 @@
         <div class="wrap rule-detail" id="rule-detail" aria-live="polite"></div>
       </section>
 
-      <section class="screen last" id="method" aria-labelledby="method-title">
+      <section class="screen" id="method" aria-labelledby="method-title">
         <div class="wrap head">
-          <h2 id="method-title">How this was made, and what it cannot show.</h2>
-          <p class="sub">
-            Every number on this page is computed from public files by an open Python pipeline, with its
-            numerator and denominator in the published data. The data shows settings, counts and timing.
-            It does not show causes, how long guests actually stay, or whether any listing breaks a rule.
-          </p>
-        </div>
-        <div class="wrap rail">
-          <ol class="pipeline" id="pipeline"></ol>
+          <h2 id="method-title"></h2>
+          <p class="sub" id="method-sub"></p>
         </div>
         <div class="wrap">
-          <details class="how wide">
-            <summary>All caveats and sources</summary>
+          <ol class="steps" id="pipeline"></ol>
+          <details class="how">
+            <summary id="all-caveats"></summary>
             <ul class="plain" id="caveats"></ul>
             <ul class="plain" id="sources"></ul>
           </details>
         </div>
-        <div class="wrap endnote">
-          <p id="endnote-caveat"></p>
-          <footer id="footer-links"></footer>
+        <div class="wrap">
+          <div class="endnote">
+            <p id="endnote-caveat"></p>
+            <footer id="footer-links"></footer>
+          </div>
         </div>
       </section>
     </main>

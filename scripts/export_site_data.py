@@ -123,6 +123,8 @@ def meta() -> dict:
         "context_events": cfg.CONTEXT_EVENTS,
         "stay_line_nights": cfg.STAY_LINE_NIGHTS,
         "professional_min": cfg.PROFESSIONAL_MIN,
+        "author": cfg.AUTHOR,
+        "published_on": cfg.PUBLISHED_ON,
         "sources": [
             {
                 "title": "Inside Airbnb",
@@ -140,16 +142,41 @@ def meta() -> dict:
                 "licence": "CC BY 4.0",
             },
         ],
-        "caveats": [
+        "caveats": CAVEATS["en"],
+        "caveats_i18n": {"es": CAVEATS["es"], "ca": CAVEATS["ca"]},
+    }
+
+
+# Reader-facing caveats, in the three site languages (same facts, same order).
+CAVEATS = {
+    "en": [
             "Prices are asking prices, not what guests paid; every Dec 2025 snapshot has no prices.",
-            "The population is listings with at least one open date in the next 365 days. An empty calendar can mean booked, blocked or withdrawn, and listings with no open dates jump to ~22-24% in every city's Sep 2026 snapshot. The 31+ share in Barcelona is 41.7% / 41.5% / 39.9% under three population definitions (see the note under the first chart).",
+            "The population is listings with at least one open date in the next 365 days. An empty calendar can mean booked, blocked or withdrawn, and listings with no open dates jump to ~22-24% in every city's Sep 2026 snapshot. The 31+ share in Barcelona is 41.7% / 41.5% / 39.9% under three population definitions.",
             "A listing that is absent from a later scrape may have been withdrawn, re-listed under a new id, or missed by the scrape.",
             "Tourist-licence shares outside Catalonia are a lower bound: only confirmed regional codes are counted.",
             "A missing or unmatched licence number is not proof of an illegal listing.",
             "Airbnb's licence form changed: the 'Exempt - seasonal rental' option appears in Barcelona between Mar and Jun 2026 and is used in Madrid and Valencia by Sep 2026, but almost never in Málaga or Sevilla, so licence categories are not comparable across those dates.",
             "Comparisons show timing and differences, not causes.",
         ],
-    }
+    "es": [
+        "Los precios son precios pedidos, no lo que pagaron los huéspedes; ninguna captura de dic. 2025 tiene precios.",
+        "La población son los anuncios con al menos una fecha disponible en los 365 días siguientes. Un calendario vacío puede significar reservado, bloqueado o retirado, y los anuncios sin fechas disponibles suben a un 22-24 % en la captura de sept. 2026 de todas las ciudades. La proporción de 31+ noches en Barcelona es del 41,7 % / 41,5 % / 39,9 % con tres definiciones de población.",
+        "Un anuncio ausente de una captura posterior puede haberse retirado, haberse vuelto a publicar con otro identificador o no haber sido captado.",
+        "Las proporciones de licencia turística fuera de Cataluña son un mínimo: solo se cuentan los códigos autonómicos confirmados.",
+        "Un número de licencia ausente o que no coincide no prueba que un anuncio sea ilegal.",
+        "El formulario de licencia de Airbnb cambió: la opción «Exento - alquiler de temporada» aparece en Barcelona entre mar. y jun. 2026 y se usa en Madrid y Valencia en sept. 2026, pero casi nunca en Málaga o Sevilla, así que las categorías de licencia no son comparables entre esas fechas.",
+        "Las comparaciones muestran momentos y diferencias, no causas.",
+    ],
+    "ca": [
+        "Els preus són preus demanats, no el que van pagar els hostes; cap captura del des. 2025 no té preus.",
+        "La població són els anuncis amb almenys una data disponible en els 365 dies següents. Un calendari buit pot voler dir reservat, bloquejat o retirat, i els anuncis sense dates disponibles pugen a un 22-24 % a la captura del set. 2026 de totes les ciutats. La proporció de 31+ nits a Barcelona és del 41,7 % / 41,5 % / 39,9 % amb tres definicions de població.",
+        "Un anunci absent d'una captura posterior pot haver estat retirat, tornat a publicar amb un altre identificador o no captat.",
+        "Les proporcions de llicència turística fora de Catalunya són un mínim: només es compten els codis autonòmics confirmats.",
+        "Un número de llicència absent o que no coincideix no prova que un anunci sigui il·legal.",
+        "El formulari de llicència d'Airbnb va canviar: l'opció «Exempt - lloguer de temporada» apareix a Barcelona entre el març i el juny del 2026 i s'usa a Madrid i València el set. 2026, però gairebé mai a Màlaga o Sevilla, de manera que les categories de llicència no són comparables entre aquestes dates.",
+        "Les comparacions mostren moments i diferències, no causes.",
+    ],
+}
 
 
 def map_points(df: pd.DataFrame) -> dict:

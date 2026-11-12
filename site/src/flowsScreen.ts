@@ -1,15 +1,17 @@
-// Screens: where December's listings went (a two-column flow diagram), and
-// whether Barcelona's month-plus exits stand out against the other cities.
+// Where December's listings went (a two-column flow diagram, with only the
+// two flows that carry the story in colour), and whether Barcelona's
+// disappearances stand out against the other cities.
 import * as d3 from "d3";
 
-import { BANDS, CITIES, CITY_LABELS, type Band, type CityRow, type TransitionTable, type Transitions } from "./data";
+import { BANDS, CITIES, type Band, type CityRow, type TransitionTable, type Transitions } from "./data";
+import { cityName, decimal, signed, T } from "./i18n";
 import {
+  chartHeight,
   COLOURS,
   formatInt,
   freshSvg,
-  heightOf,
-  hideTip,
   insetOf,
+  isNarrow,
   isWaiting,
   monthYear,
   MOTION_MS,
@@ -18,27 +20,17 @@ import {
   setLegend,
   setText,
   share,
-  showTip,
   widthOf,
+  withTip,
 } from "./story";
 
-const OUTCOME_LABEL: Record<string, string> = {
-  under_31: "Under 31",
-  exactly_31: "Exactly 31",
-  over_31: "Over 31",
-  inactive: "Listed, no open dates",
-  gone: "Absent from the scrape",
-};
-const SHORT_OUTCOME: Record<string, string> = { inactive: "No open dates", gone: "Absent" };
 const OUTCOME_COLOUR: Record<string, string> = {
-  ...COLOURS,
+  under_31: COLOURS.under_31,
+  exactly_31: COLOURS.exactly_31,
+  over_31: COLOURS.over_31,
   inactive: COLOURS.other,
-  gone: COLOURS.pink,
+  gone: COLOURS.ink,
 };
-
-function bandLabel(band: Band, line: number): string {
-  return band === "under_31" ? `Under ${line} nights` : band === "exactly_31" ? `Exactly ${line}` : `Over ${line}`;
-}
 
 interface FlowNode {
   key: string;
@@ -57,65 +49,51 @@ interface FlowLink {
   width: number;
 }
 
+const MONTH_PLUS: Band[] = ["exactly_31", "over_31"];
+
 export function initFlowsScreen(transitions: Transitions, line: number): () => void {
   const table: TransitionTable = transitions.cities.barcelona;
   const rowTotal = (band: Band) => d3.sum(table.counts[table.from.indexOf(band)] ?? []);
   const cell = (band: Band, to: string) => table.counts[table.from.indexOf(band)]?.[table.to.indexOf(to)] ?? 0;
-  const monthPlusBands: Band[] = ["exactly_31", "over_31"];
-  const monthPlus = d3.sum(monthPlusBands, rowTotal);
-  const monthPlusGone = d3.sum(monthPlusBands, (b) => cell(b, "gone"));
-  const shorterGone = cell("under_31", "gone");
+  const monthPlus = d3.sum(MONTH_PLUS, rowTotal);
+  const monthPlusGone = d3.sum(MONTH_PLUS, (b) => cell(b, "gone"));
+  const switched = d3.sum(MONTH_PLUS, (b) => cell(b, "under_31"));
   const shorter = rowTotal("under_31");
+  const shorterGone = cell("under_31", "gone");
   const from = monthYear(table.from_snapshot);
   const to = monthYear(table.to_snapshot);
+  // the two flows the story is about: disappearing, and switching to short stays
+  const highlighted = (l: FlowLink) => l.to === "gone" || (MONTH_PLUS.includes(l.from) && l.to === "under_31");
 
-  setText(
-    "flows-title",
-    `Of ${from}'s ${formatInt(monthPlus)} month-plus listings, ${pct(share(monthPlusGone, monthPlus), 0)} were absent from the ${to} scrape. Of the shorter stays, ${pct(share(shorterGone, shorter), 0)}.`,
-  );
-  setText(
-    "flows-sub",
-    `Inside Airbnb keeps a listing's id across snapshots, so each Barcelona listing with open dates in ${from} can be followed to ${to}: same minimum-stay group, another group, still listed without open dates, or absent from the later scrape. ` +
-      `Catalonia extended its rent limit to seasonal lets on 1 January 2026, in between.`,
-  );
-  setText(
-    "flows-how",
-    "Absent means withdrawn, re-listed under a new id, or missed by the scraper: the file cannot say which. " +
-      "Listed without open dates can mean fully booked, blocked or paused. Listings that first appeared after the first snapshot are not in this diagram.",
-  );
+  setText("flows-title", T.flows.title(from, formatInt(monthPlus), pct(share(monthPlusGone, monthPlus), 0), to, pct(share(shorterGone, shorter), 0)));
+  setText("flows-sub", T.flows.sub(from, to, formatInt(switched), formatInt(monthPlusGone)));
+  setText("flows-how", T.flows.how);
   setLegend(
     "flows-legend",
-    ["under_31", "exactly_31", "over_31", "inactive", "gone"].map((k) => [
-      k in COLOURS ? bandLabel(k as Band, line) : (OUTCOME_LABEL[k] ?? k),
-      OUTCOME_COLOUR[k] ?? COLOURS.other,
-    ]),
+    ["under_31", "exactly_31", "over_31", "inactive", "gone"].map((k) => [k in OUTCOME_COLOUR && BANDS.includes(k as Band) ? T.band(k as Band, line) : k === "gone" ? T.flows.gone : T.flows.inactive, OUTCOME_COLOUR[k] ?? COLOURS.other]),
   );
 
   const root = document.getElementById("flows-chart") as HTMLElement;
   const KEY = "flows";
   return () => {
     const W = widthOf(root);
-    const H = heightOf(root, 520);
+    const narrow = isNarrow();
+    const H = chartHeight(W, 420, 560, narrow ? 1.25 : 0.42);
     const inset = insetOf();
-    const narrow = W < 640;
-    const svg = freshSvg(
-      root,
-      W,
-      H,
-      `Flow diagram, Barcelona ${from} to ${to}: ${formatInt(monthPlusGone)} of ${formatInt(monthPlus)} month-plus listings and ${formatInt(shorterGone)} of ${formatInt(shorter)} shorter-stay listings were absent from the later scrape.`,
-    );
+    const svg = freshSvg(root, W, H, T.flows.aria(from, to, formatInt(monthPlusGone), formatInt(monthPlus), formatInt(shorterGone), formatInt(shorter)));
 
     const nodeW = 12;
     const pad = narrow ? 8 : 12;
-    const top = 22;
+    const top = 24;
     const bottom = 8;
     const leftX = inset + (narrow ? 0 : 150);
-    const rightX = W - inset - nodeW - (narrow ? 118 : 190);
+    const rightX = W - inset - nodeW - (narrow ? 118 : 200);
     const total = d3.sum(BANDS, rowTotal);
+    const outcomeLabel = (k: string) =>
+      BANDS.includes(k as Band) ? T.band(k as Band, line) : k === "gone" ? (narrow ? T.flows.goneShort : T.flows.gone) : narrow ? T.flows.inactiveShort : T.flows.inactive;
 
     const layout = (keys: string[], value: (k: string) => number, colour: (k: string) => string, label: (k: string) => string): FlowNode[] => {
-      const room = H - top - bottom - pad * (keys.length - 1);
-      const k = room / total;
+      const k = (H - top - bottom - pad * (keys.length - 1)) / total;
       let y = top;
       return keys.map((key) => {
         const v = value(key);
@@ -124,16 +102,10 @@ export function initFlowsScreen(transitions: Transitions, line: number): () => v
         return node;
       });
     };
-    const left = layout(BANDS as unknown as string[], (k) => rowTotal(k as Band), (k) => COLOURS[k as Band], (k) => bandLabel(k as Band, line));
-    const right = layout(
-      table.to,
-      (k) => d3.sum(BANDS, (b) => cell(b, k)),
-      (k) => OUTCOME_COLOUR[k] ?? COLOURS.other,
-      (k) => (k in COLOURS ? (narrow ? (OUTCOME_LABEL[k] ?? k) : bandLabel(k as Band, line)) : narrow ? (SHORT_OUTCOME[k] ?? k) : (OUTCOME_LABEL[k] ?? k)),
-    );
+    const left = layout([...BANDS], (k) => rowTotal(k as Band), (k) => COLOURS[k as Band], (k) => T.band(k as Band, line));
+    const right = layout(table.to, (k) => d3.sum(BANDS, (b) => cell(b, k)), (k) => OUTCOME_COLOUR[k] ?? COLOURS.other, outcomeLabel);
     const scale = (H - top - bottom - pad * (BANDS.length - 1)) / total;
 
-    // links: stacked in order within each node
     const leftCursor = new Map(left.map((n) => [n.key, n.y0]));
     const rightCursor = new Map(right.map((n) => [n.key, n.y0]));
     const links: FlowLink[] = [];
@@ -160,94 +132,51 @@ export function initFlowsScreen(transitions: Transitions, line: number): () => v
       const mid = (x0 + x1) / 2;
       return `M${x0},${l.sy}C${mid},${l.sy} ${mid},${l.ty} ${x1},${l.ty}`;
     };
-
-    svg
-      .append("text")
-      .attr("x", leftX)
-      .attr("y", 12)
-      .attr("class", "lab")
-      .text(from);
-    svg
-      .append("text")
-      .attr("x", rightX + nodeW)
-      .attr("y", 12)
-      .attr("text-anchor", "end")
-      .attr("class", "lab")
-      .text(to);
+    svg.append("text").attr("x", leftX).attr("y", 14).attr("class", "lab-strong").text(from);
+    svg.append("text").attr("x", rightX + nodeW).attr("y", 14).attr("text-anchor", "end").attr("class", "lab-strong").text(to);
 
     const waiting = isWaiting(KEY);
-    const g = svg.append("g");
-    const clipRect = svg
-      .append("clipPath")
-      .attr("id", "flows-clip")
-      .append("rect")
-      .attr("x", 0)
-      .attr("y", 0)
-      .attr("height", H)
-      .attr("width", waiting ? x0 : W);
-    g.attr("clip-path", "url(#flows-clip)");
-
+    const g = svg.append("g").attr("clip-path", "url(#flows-clip)");
+    const clipRect = svg.append("clipPath").attr("id", "flows-clip").append("rect").attr("height", H).attr("width", waiting ? x0 : W);
+    const baseOpacity = (l: FlowLink) => (highlighted(l) ? 0.55 : 0.12);
     const linkSel = g
       .selectAll<SVGPathElement, FlowLink>("path")
       .data(links)
       .join("path")
       .attr("d", path)
       .attr("fill", "none")
-      .attr("stroke", (l) => COLOURS[l.from])
-      .attr("stroke-opacity", (l) => (l.to === "gone" ? 0.55 : 0.28))
-      .attr("stroke-width", (l) => Math.max(1, l.width))
-      .on("pointermove", (event: PointerEvent, l) => {
-        linkSel.attr("stroke-opacity", (o) => (o === l ? 0.75 : 0.08));
-        showTip(
-          event,
-          `<b>${bandLabel(l.from, line)} → ${OUTCOME_LABEL[l.to]?.toLowerCase()}</b>${formatInt(l.value)} listings, ${pct(share(l.value, rowTotal(l.from)))} of the ${bandLabel(l.from, line).toLowerCase()} group in ${from}`,
-        );
-      })
-      .on("pointerleave", () => {
-        linkSel.attr("stroke-opacity", (l) => (l.to === "gone" ? 0.55 : 0.28));
-        hideTip();
-      });
+      .attr("stroke", (l) => (highlighted(l) ? COLOURS[l.from] : COLOURS.muted))
+      .attr("stroke-opacity", baseOpacity)
+      .attr("stroke-width", (l) => Math.max(1, l.width));
+    withTip(
+      linkSel,
+      (l) => T.flows.tip(T.band(l.from, line), outcomeLabel(l.to), formatInt(l.value), pct(share(l.value, rowTotal(l.from))), from),
+      (l) => linkSel.attr("stroke-opacity", (o) => (l === null ? baseOpacity(o) : o === l ? 0.8 : 0.06)),
+    );
 
-    const drawNodes = (nodes: FlowNode[], x: number, side: "left" | "right", denominators: boolean) => {
+    const drawNodes = (nodes: FlowNode[], x: number, side: "left" | "right") => {
       for (const n of nodes) {
-        svg
-          .append("rect")
-          .attr("x", x)
-          .attr("y", n.y0)
-          .attr("width", nodeW)
-          .attr("height", Math.max(1, n.y1 - n.y0))
-          .attr("rx", 2)
-          .attr("fill", n.colour);
-        const tx = side === "left" ? x - 8 : x + nodeW + 8;
+        svg.append("rect").attr("x", x).attr("y", n.y0).attr("width", nodeW).attr("height", Math.max(1, n.y1 - n.y0)).attr("rx", 1).attr("fill", n.colour);
         const ty = (n.y0 + n.y1) / 2;
-        const text = svg
-          .append("text")
-          .attr("x", narrow && side === "left" ? x + nodeW + 6 : tx)
-          .attr("y", ty - (narrow ? 0 : 2))
-          .attr("text-anchor", side === "left" && !narrow ? "end" : "start")
-          .attr("class", "lab-strong hl");
         if (narrow && side === "left") {
-          text.text(formatInt(n.value));
+          svg.append("text").attr("x", x + nodeW + 6).attr("y", ty + 4).attr("class", "lab-strong hl").text(formatInt(n.value));
           continue;
         }
+        const tx = side === "left" ? x - 8 : x + nodeW + 8;
+        const text = svg.append("text").attr("x", tx).attr("y", ty - 2).attr("text-anchor", side === "left" ? "end" : "start").attr("class", "lab-strong hl");
         text.append("tspan").text(n.label);
         text
           .append("tspan")
-          .attr("x", narrow && side === "left" ? x + nodeW + 6 : tx)
+          .attr("x", tx)
           .attr("dy", 16)
-          .attr("class", "lab")
           .style("font-weight", "400")
-          .text(denominators ? `${formatInt(n.value)} (${pct(share(n.value, total), 0)})` : formatInt(n.value));
+          .text(side === "right" ? `${formatInt(n.value)} (${pct(share(n.value, total), 0)})` : formatInt(n.value));
       }
     };
-    drawNodes(left, leftX, "left", false);
-    drawNodes(right, rightX, "right", true);
+    drawNodes(left, leftX, "left");
+    drawNodes(right, rightX, "right");
 
-    if (waiting) {
-      revealOnView(KEY, root, () => {
-        clipRect.transition().duration(MOTION_MS).ease(d3.easeCubicInOut).attr("width", W);
-      });
-    }
+    if (waiting) revealOnView(KEY, root, () => clipRect.transition().duration(MOTION_MS).ease(d3.easeCubicInOut).attr("width", W));
   };
 }
 
@@ -263,132 +192,107 @@ export function initGapScreen(cities: CityRow[]): () => void {
 
   setText(
     "gap-title",
-    distinguishable.length === 0
-      ? `Barcelona's ${Math.round(bcn.exit_gap.points)}-point exit gap cannot be told apart from the four other cities'.`
-      : `Barcelona's exit gap differs clearly from ${distinguishable.map((r) => CITY_LABELS[r.city]).join(", ")}.`,
+    distinguishable.length === 0 ? T.gap.titleSame(Math.round(bcn.exit_gap.points)) : T.gap.titleDiff(distinguishable.map((r) => cityName(r.city)).join(", ")),
   );
-  setText(
-    "gap-sub",
-    "The exit gap is the share of month-plus listings absent from the later scrape minus the share of shorter-stay listings absent. " +
-      `Of the five cities, only Barcelona is under the Catalan seasonal-let rule. The gap is clearly above zero in ${clearlyAbove.length} of 5 cities, ` +
-      `and ${larger.length === 0 ? "no other city" : larger.map((r) => CITY_LABELS[r.city]).join(" and ")} ${larger.length === 1 ? "has" : "have"} a larger point estimate.`,
-  );
-  setText(
-    "gap-how",
-    "Lines are 95% intervals from resampling whole host accounts, because one operator can withdraw many listings at once; resampling listings would understate the uncertainty. " +
-      "A city is called different from Barcelona only when the interval of the difference (Barcelona minus that city) excludes zero. The other cities have only two snapshots, about nine months apart.",
-  );
+  setText("gap-sub", T.gap.sub(clearlyAbove.length, larger.map((r) => cityName(r.city))));
+  setText("gap-how", T.gap.how);
   setLegend("gap-legend", [
-    ["Barcelona", COLOURS.ink],
-    ["Other cities", COLOURS.muted],
+    [T.gap.barcelona, COLOURS.ink],
+    [T.gap.others, COLOURS.muted],
   ]);
 
   const root = document.getElementById("gap-chart") as HTMLElement;
   const KEY = "gap";
   return () => {
     const W = widthOf(root);
-    const H = heightOf(root, 360);
+    const narrow = isNarrow();
+    const H = chartHeight(W, 300, 380, 0.3);
     const inset = insetOf();
     const svg = freshSvg(
       root,
       W,
       H,
-      "Dot chart with 95% intervals, exit gap in percentage points: " +
-        rows.map((r) => `${CITY_LABELS[r.city]} ${r.exit_gap.points} (${r.exit_gap.ci_low} to ${r.exit_gap.ci_high})`).join("; "),
+      T.gap.aria(rows.map((r) => `${cityName(r.city)} ${decimal(r.exit_gap.points)} (${decimal(r.exit_gap.ci_low)} – ${decimal(r.exit_gap.ci_high)})`).join("; ")),
     );
-    const labelW = W < 640 ? 84 : 130;
+    const labelW = narrow ? 84 : 130;
     const lo = Math.min(0, d3.min(rows, (r) => r.exit_gap.ci_low) ?? 0);
     const hi = d3.max(rows, (r) => r.exit_gap.ci_high) ?? 40;
-    const x = d3
-      .scaleLinear()
-      .domain([lo - 2, hi + 2])
-      .nice()
-      .range([inset + labelW, W - inset - 10]);
-    const y = d3
-      .scaleBand<string>()
-      .domain(rows.map((r) => r.city))
-      .range([14, H - 34])
-      .padding(0.3);
+    const x = d3.scaleLinear().domain([lo - 2, hi + 2]).nice().range([inset + labelW, W - inset - 10]);
+    const y = d3.scaleBand<string>().domain(rows.map((r) => r.city)).range([26, H - 30]).padding(0.3);
 
-    for (const t of x.ticks(W < 640 ? 4 : 8)) {
-      svg.append("line").attr("class", t === 0 ? "axisline" : "gridline").attr("x1", x(t)).attr("x2", x(t)).attr("y1", 6).attr("y2", H - 30);
+    svg.append("text").attr("x", W - inset).attr("y", 12).attr("text-anchor", "end").text(T.gap.axis);
+    for (const t of x.ticks(narrow ? 4 : 8)) {
+      svg.append("line").attr("class", t === 0 ? "axisline" : "gridline").attr("x1", x(t)).attr("x2", x(t)).attr("y1", 20).attr("y2", H - 26);
       svg
         .append("text")
         .attr("x", x(t))
-        .attr("y", H - 12)
+        .attr("y", H - 8)
         .attr("text-anchor", "middle")
-        .text(t === 0 ? (W < 640 ? "0" : "0 = no gap") : `${t > 0 ? "+" : ""}${t}`);
+        .text(t === 0 ? (narrow ? "0" : T.gap.zero) : signed(t));
     }
-    svg
-      .append("text")
-      .attr("x", W - inset)
-      .attr("y", 2)
-      .attr("text-anchor", "end")
-      .text("percentage points, month-plus minus shorter stays →");
 
     const waiting = isWaiting(KEY);
     const zero = x(0);
     rows.forEach((r, i) => {
+      const e = r.exit_gap;
       const cy = (y(r.city) ?? 0) + y.bandwidth() / 2;
       const isBcn = r.city === "barcelona";
       const colour = isBcn ? COLOURS.ink : COLOURS.muted;
-      svg
-        .append("text")
-        .attr("x", inset)
-        .attr("y", cy + 4)
-        .attr("class", isBcn ? "lab-strong" : "lab")
-        .text(CITY_LABELS[r.city]);
-      const g = svg.append("g").attr("class", "gap-row");
-      const ci = g
+      svg.append("text").attr("x", inset).attr("y", cy + 4).attr("class", isBcn ? "lab-strong" : "lab").text(cityName(r.city));
+      const ci = svg
         .append("line")
         .attr("y1", cy)
         .attr("y2", cy)
-        .attr("x1", waiting ? zero : x(r.exit_gap.ci_low))
-        .attr("x2", waiting ? zero : x(r.exit_gap.ci_high))
+        .attr("x1", waiting ? zero : x(e.ci_low))
+        .attr("x2", waiting ? zero : x(e.ci_high))
         .attr("stroke", colour)
         .attr("stroke-width", isBcn ? 4 : 3)
         .attr("stroke-linecap", "round")
-        .attr("opacity", 0.55);
-      const dot = g
+        .attr("opacity", 0.45);
+      const dot = svg
         .append("circle")
         .attr("cy", cy)
-        .attr("cx", waiting ? zero : x(r.exit_gap.points))
+        .attr("cx", waiting ? zero : x(e.points))
         .attr("r", isBcn ? 9 : 7)
         .attr("fill", colour)
         .attr("stroke", COLOURS.page)
         .attr("stroke-width", 2);
-      const value = g
+      const value = svg
         .append("text")
         .attr("class", "lab-strong hl")
-        .attr("x", x(r.exit_gap.points))
+        .attr("x", x(e.points))
         .attr("y", cy - 14)
         .attr("text-anchor", "middle")
         .attr("opacity", waiting ? 0 : 1)
-        .text(`${r.exit_gap.points > 0 ? "+" : ""}${r.exit_gap.points}`);
-      g.append("rect")
+        .text(signed(e.points));
+      const hit = svg
+        .append("rect")
+        .datum(r)
         .attr("x", inset)
-        .attr("width", W - 2 * inset)
+        .attr("width", Math.max(0, W - 2 * inset))
         .attr("y", y(r.city) ?? 0)
         .attr("height", y.bandwidth())
-        .attr("fill", "transparent")
-        .on("pointermove", (event: PointerEvent) => {
-          const e = r.exit_gap;
-          const contrast = e.vs_barcelona
-            ? `<br>Barcelona minus ${CITY_LABELS[r.city]}: ${e.vs_barcelona.difference_points > 0 ? "+" : ""}${e.vs_barcelona.difference_points} (${e.vs_barcelona.ci_low} to ${e.vs_barcelona.ci_high})`
-            : "";
-          showTip(
-            event,
-            `<b>${CITY_LABELS[r.city]}: ${e.points > 0 ? "+" : ""}${e.points} points</b>95% interval ${e.ci_low} to ${e.ci_high}<br>` +
-              `${formatInt(e.month_plus_listings)} month-plus and ${formatInt(e.shorter_listings)} shorter-stay listings, ${formatInt(e.accounts)} host accounts<br>` +
-              `The 10 largest accounts hold ${e.top10_accounts_share_of_month_plus_pct}% of the month-plus listings${contrast}`,
-          );
-        })
-        .on("pointerleave", hideTip);
+        .attr("fill", "transparent");
+      withTip(hit, (row) => {
+        const g = row.exit_gap;
+        const contrast = g.vs_barcelona ? T.gap.contrast(cityName(row.city), signed(g.vs_barcelona.difference_points), decimal(g.vs_barcelona.ci_low), decimal(g.vs_barcelona.ci_high)) : "";
+        return T.gap.tip(
+          cityName(row.city),
+          signed(g.points),
+          decimal(g.ci_low),
+          decimal(g.ci_high),
+          formatInt(g.month_plus_listings),
+          formatInt(g.shorter_listings),
+          formatInt(g.accounts),
+          pct(g.top10_accounts_share_of_month_plus_pct),
+          contrast,
+        );
+      });
       if (waiting) {
         revealOnView(`${KEY}-${r.city}`, root, () => {
           const t = d3.transition().duration(MOTION_MS * 0.8).delay(i * 90).ease(d3.easeCubicOut);
-          ci.transition(t).attr("x1", x(r.exit_gap.ci_low)).attr("x2", x(r.exit_gap.ci_high));
-          dot.transition(t).attr("cx", x(r.exit_gap.points));
+          ci.transition(t).attr("x1", x(e.ci_low)).attr("x2", x(e.ci_high));
+          dot.transition(t).attr("cx", x(e.points));
           value.transition().delay(MOTION_MS * 0.8 + i * 90).duration(300).attr("opacity", 1);
         });
       }
