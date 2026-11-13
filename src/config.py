@@ -288,8 +288,8 @@ POST_OBSERVATION_DEVELOPMENTS = [
             "Published after every snapshot used here, so it cannot explain "
             "any change in the data. A decree-law must be validated by "
             "Congress within 30 days; with the Cortes dissolved, the vote fell "
-            "to the Diputación Permanente, scheduled for 12 Nov 2026. The "
-            "result was not yet known when this page was published. Summary read from the BOE text "
+            "to the Diputación Permanente, scheduled for 12 Nov 2026. "
+            "Validated by the Diputación Permanente on 12 Nov 2026. Summary read from the BOE text "
             "(BOE-A-2026-20823, 7 Oct 2026)."
         ),
         "url": "https://www.boe.es/buscar/doc.php?id=BOE-A-2026-20823",
@@ -585,7 +585,7 @@ LATER_I18N = {
                 "Publicado después de todas las capturas usadas aquí, así que no puede explicar ningún "
                 "cambio en los datos. Un real decreto-ley debe convalidarse en el Congreso en 30 días; con "
                 "las Cortes disueltas, la votación correspondía a la Diputación Permanente, prevista para el "
-                "12 nov. 2026. Al publicar esta página aún no se conocía el resultado. Resumen leído del texto del BOE "
+                "12 nov. 2026. Convalidado por la Diputación Permanente el 12 nov. 2026. Resumen leído del texto del BOE "
                 "(BOE-A-2026-20823, 7 oct. 2026)."
             ),
         },
@@ -602,7 +602,7 @@ LATER_I18N = {
                 "Publicat després de totes les captures que s'usen aquí, de manera que no pot explicar cap "
                 "canvi en les dades. Un reial decret llei s'ha de convalidar al Congrés en 30 dies; amb les "
                 "Corts dissoltes, la votació corresponia a la Diputació Permanent, prevista per al "
-                "12 nov. 2026. En publicar aquesta pàgina encara no se'n coneixia el resultat. Resum llegit del text del BOE "
+                "12 nov. 2026. Convalidat per la Diputació Permanent el 12 nov. 2026. Resum llegit del text del BOE "
                 "(BOE-A-2026-20823, 7 oct. 2026)."
             ),
         },
