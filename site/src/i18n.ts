@@ -267,9 +267,9 @@ interface Strings {
 }
 
 const en: Strings = {
-  htmlTitle: "The 31-Night Line: Barcelona's Airbnb listings and the housing rules",
+  htmlTitle: "31 nits: Barcelona's Airbnb listings and the housing rules",
   skip: "Skip to the content",
-  banner: (from, to) => `<b>The 31-Night Line</b> · Airbnb in Barcelona and four Spanish cities, ${from} – ${to}`,
+  banner: (from, to) => `<b>31 nits</b> · Airbnb in Barcelona and four Spanish cities, ${from} – ${to}`,
   how: "How is this made?",
   scroll: "Scroll ↓",
   eyebrow: "Short-term rentals · housing rules · open data",
@@ -458,9 +458,9 @@ const en: Strings = {
 };
 
 const es: Strings = {
-  htmlTitle: "La línea de las 31 noches: los anuncios de Airbnb en Barcelona y las normas de vivienda",
+  htmlTitle: "31 nits: los anuncios de Airbnb en Barcelona y las normas de vivienda",
   skip: "Saltar al contenido",
-  banner: (from, to) => `<b>La línea de las 31 noches</b> · Airbnb en Barcelona y otras cuatro ciudades españolas, ${from} – ${to}`,
+  banner: (from, to) => `<b>31 nits</b> · Airbnb en Barcelona y otras cuatro ciudades españolas, ${from} – ${to}`,
   how: "¿Cómo se ha hecho?",
   scroll: "Desliza ↓",
   eyebrow: "Alquiler de corta estancia · normas de vivienda · datos abiertos",
@@ -649,9 +649,9 @@ const es: Strings = {
 };
 
 const ca: Strings = {
-  htmlTitle: "La línia de les 31 nits: els anuncis d'Airbnb a Barcelona i les normes d'habitatge",
+  htmlTitle: "31 nits: els anuncis d'Airbnb a Barcelona i les normes d'habitatge",
   skip: "Salta al contingut",
-  banner: (from, to) => `<b>La línia de les 31 nits</b> · Airbnb a Barcelona i quatre ciutats espanyoles més, ${from} – ${to}`,
+  banner: (from, to) => `<b>31 nits</b> · Airbnb a Barcelona i quatre ciutats espanyoles més, ${from} – ${to}`,
   how: "Com s'ha fet?",
   scroll: "Llisca ↓",
   eyebrow: "Lloguer de curta durada · normes d'habitatge · dades obertes",

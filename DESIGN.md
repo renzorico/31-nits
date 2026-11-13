@@ -1,4 +1,4 @@
-# Design System: The 31-Night Line
+# Design System: 31 nits
 
 A light, map-led atlas of Barcelona's short-term rentals (chosen after the
 UX audit of 2026-11-12: the earlier dark scroll story read as a tech

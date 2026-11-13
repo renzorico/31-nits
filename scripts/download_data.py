@@ -16,7 +16,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from src import sources as src
 
-USER_AGENT = "spain-housing-str-analysis (research; contact via GitHub)"
+USER_AGENT = "31-nits (research; contact via GitHub)"
 TIMEOUT_SECONDS = 120
 
 

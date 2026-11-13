@@ -52,7 +52,7 @@ def main() -> None:
     fig.text(
         0.05,
         0.86,
-        "The 31-night line",
+        "31 nits",
         fontsize=44,
         fontweight="bold",
         color=TEXT,

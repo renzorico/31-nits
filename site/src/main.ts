@@ -28,7 +28,7 @@ import { byId, dayMonthYear, formatInt, monthYear, pct, redrawOnResize, safely, 
 import { initWall } from "./wall";
 
 const LATEST_ROUND = "Sep 2026";
-const REPOSITORY_URL = "https://github.com/renzorico/spain-housing-str-analysis";
+const REPOSITORY_URL = "https://github.com/renzorico/31-nits";
 
 /** Static text in index.html, in the reader's language. */
 function renderChrome(meta: Meta): void {

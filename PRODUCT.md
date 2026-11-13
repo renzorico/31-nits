@@ -23,7 +23,7 @@ A data story that publishes its own corrections and limits. Every percentage has
 ## Operating Context
 
 - Static site (Vite + strict TypeScript + Observable Plot + MapLibre) built from JSON exported by a Python/pandas pipeline in `src/` and `scripts/export_site_data.py`; notebooks 01-04 hold the full analysis. Site text that quotes numbers computes them from the exported data.
-- Live at https://renzorico.github.io/spain-housing-str-analysis/ (GitHub Pages). The owner pushes; the agent commits small.
+- Live at https://renzorico.github.io/31-nits/ (GitHub Pages). The owner pushes; the agent commits small.
 - Independent audits are kept in `audits/` (latest UX audit 2026-11-03 flagged length and density as the top issue).
 
 ## Capabilities and Constraints
@@ -36,7 +36,7 @@ A data story that publishes its own corrections and limits. Every percentage has
 
 ## Brand Commitments
 
-- Name: "The 31-Night Line".
+- Name: "31 nits" (Catalan for "31 nights"; used unchanged in English and Spanish).
 - Strict neutrality (binding): describe rules as policy levers (what it says / what the data shows / what it cannot show). Never name parties or give verdicts. Compare across all cities, never one hand-picked comparison.
 
 ## Evidence on Hand

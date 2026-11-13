@@ -1,11 +1,11 @@
-# The 31-Night Line
+# 31 nits
 
 **Short-term rentals and housing rules in Barcelona and four Spanish cities:
 what the data shows, and what it cannot show.**
 
-**Live site:** https://renzorico.github.io/spain-housing-str-analysis/
+**Live site:** https://renzorico.github.io/31-nits/
 
-![The 31-night line: Barcelona Airbnb listings by minimum stay](site/public/og-image.png)
+![31 nits: Barcelona Airbnb listings by minimum stay](site/public/og-image.png)
 
 Four quarterly snapshots of Airbnb listings (Dec 2025 – Sep 2026) for
 Barcelona, plus Madrid, Valencia, Málaga and Sevilla, set against
