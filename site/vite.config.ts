@@ -1,9 +1,9 @@
 import { defineConfig, type Plugin } from "vite";
 
 // Social previews (LinkedIn, Open Graph) need absolute URLs, while the page
-// itself uses relative paths. CI passes the real Pages URL in SITE_URL;
-// locally the expected project URL is used.
-const DEFAULT_SITE_URL = "https://renzorico.github.io/31-nits/";
+// itself uses relative paths. SITE_URL overrides the production address, for
+// example with a custom domain.
+const DEFAULT_SITE_URL = "https://31-nits.vercel.app/";
 const SITE_URL_PLACEHOLDER = /__SITE_URL__/g;
 
 function siteUrl(): string {
@@ -18,8 +18,7 @@ function absoluteSiteUrl(): Plugin {
   };
 }
 
-// Relative base so the build works on a GitHub Pages project URL
-// (https://<user>.github.io/<repo>/) without knowing the repo name.
+// Relative base so the build works under any address or subpath.
 export default defineConfig({
   base: "./",
   plugins: [absoluteSiteUrl()],

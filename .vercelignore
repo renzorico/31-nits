@@ -1,0 +1,10 @@
+# Upload only what the site build needs: never raw data, notebooks or local env files.
+/*
+!/site
+!/tests
+!/scripts
+!/vercel.json
+node_modules
+dist
+__pycache__
+.env*

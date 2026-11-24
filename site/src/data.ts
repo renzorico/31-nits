@@ -1,5 +1,5 @@
 // Types and loaders for the JSON written by scripts/export_site_data.py.
-// Paths are relative so the build works under any GitHub Pages subpath.
+// Paths are relative so the build works under any subpath.
 
 export const CITIES = ["barcelona", "madrid", "valencia", "malaga", "sevilla"] as const;
 export type City = (typeof CITIES)[number];

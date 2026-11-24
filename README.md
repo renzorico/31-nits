@@ -3,7 +3,7 @@
 **Short-term rentals and housing rules in Barcelona and four Spanish cities:
 what the data shows, and what it cannot show.**
 
-**Live site:** https://renzorico.github.io/31-nits/
+**Live site:** https://31-nits.vercel.app/
 
 ![31 nits: Barcelona Airbnb listings by minimum stay](site/public/og-image.png)
 
@@ -214,10 +214,10 @@ npm run build                        # typecheck + build into site/dist/
 No environment variables or API keys are needed. The basemap comes from
 [OpenFreeMap](https://openfreemap.org).
 
-**Deploy:** pushing to `main` runs `.github/workflows/deploy-site.yml`. It
-checks the exported data for identifying fields, builds the site and
-publishes it to GitHub Pages. One-time setup: in the repository settings,
-set **Pages → Source** to **GitHub Actions**.
+**Deploy:** pushing to `main` deploys to Vercel (`vercel.json`). The build
+(`scripts/vercel_build.sh`) first checks the exported data for identifying
+fields and stops if it finds any. The old GitHub Pages address only redirects
+(`redirect/`, `.github/workflows/pages-redirect.yml`).
 
 ---
 

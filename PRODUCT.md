@@ -23,7 +23,7 @@ A data story that publishes its own corrections and limits. Every percentage has
 ## Operating Context
 
 - Static site (Vite + strict TypeScript + Observable Plot + MapLibre) built from JSON exported by a Python/pandas pipeline in `src/` and `scripts/export_site_data.py`; notebooks 01-04 hold the full analysis. Site text that quotes numbers computes them from the exported data.
-- Live at https://renzorico.github.io/31-nits/ (GitHub Pages). The owner pushes; the agent commits small.
+- Live at https://31-nits.vercel.app/ (Vercel). The owner pushes; the agent commits small.
 - Independent audits are kept in `audits/` (latest UX audit 2026-11-03 flagged length and density as the top issue).
 
 ## Capabilities and Constraints
