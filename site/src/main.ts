@@ -24,7 +24,7 @@ import { initPrice } from "./price";
 import { initRegisterScreen } from "./registerScreen";
 import { initRents } from "./rentsScreen";
 import { initRules } from "./rules";
-import { byId, dayMonthYear, formatInt, monthYear, pct, redrawOnResize, safely, setHtml, setText, type Draw } from "./story";
+import { byId, dayMonthYear, drawOnWidth, formatInt, monthYear, pct, safely, setHtml, setText, type Draw } from "./story";
 import { initWall } from "./wall";
 
 const LATEST_ROUND = "Sep 2026";
@@ -133,10 +133,7 @@ async function main(): Promise<void> {
     safely("rents", initRents(rents, meta)),
     safely("rules", initRules({ meta, register, rents, trends, cities })),
   ];
-  const drawAll = () => draws.forEach((draw) => draw());
-  // first draw after layout, so every chart container has its real width
-  requestAnimationFrame(drawAll);
-  redrawOnResize(drawAll);
+  drawOnWidth(() => draws.forEach((draw) => draw()));
 }
 
 main().catch((error: unknown) => {

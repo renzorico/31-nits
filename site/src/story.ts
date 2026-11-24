@@ -116,18 +116,22 @@ export function revealOnView(key: string, root: Element, start: () => void): voi
 
 // ---------- Drawing loop ----------
 export type Draw = () => void;
-let lastWidth = innerWidth;
+let drawnWidth = 0;
 let resizeTimer = 0;
-export function redrawOnResize(draw: Draw): void {
+
+/** First draw after layout, so every chart container has its real width, then again on width changes. */
+export function drawOnWidth(draw: Draw): void {
+  const drawIfNeeded = () => {
+    // A hidden page can be 0 px wide, where scales turn negative: wait for a real width.
+    // Phones fire resize when the URL bar hides: only redraw when the width changed.
+    if (innerWidth === 0 || innerWidth === drawnWidth) return;
+    drawnWidth = innerWidth;
+    draw();
+  };
+  requestAnimationFrame(drawIfNeeded);
   addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = window.setTimeout(() => {
-      // phones fire resize when the URL bar hides; only redraw on width changes
-      if (innerWidth !== lastWidth) {
-        lastWidth = innerWidth;
-        draw();
-      }
-    }, 180);
+    resizeTimer = window.setTimeout(drawIfNeeded, 180);
   });
 }
 
